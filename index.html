@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marine Motor Control Wiring — Magnetic Contactor Start/Stop</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f5f3ee;--ink:#17212b;--mut:#5b6876;--line:#d9d3c7;--navy:#0b3d5c;--live:#e4572e;--grn:#2e9e5b;--amb:#f2a900;--card:#fff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 'IBM Plex Sans',system-ui,sans-serif}
+.wrap{max-width:1260px;margin:0 auto;padding:0 20px}
+header{background:var(--navy);color:#fff;padding:40px 0 30px;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:24px 24px}
+header .eyebrow{font:600 12px 'IBM Plex Mono';letter-spacing:.14em;text-transform:uppercase;color:#9cc7e4}
+header h1{margin:8px 0 10px;font-size:clamp(26px,4vw,40px);line-height:1.15}
+header p{max-width:820px;color:#d6e6f2;margin:0}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{font:500 12px 'IBM Plex Mono';border:1px solid rgba(255,255,255,.3);padding:4px 10px;border-radius:99px;color:#fff}
+nav{position:sticky;top:0;z-index:5;background:rgba(245,243,238,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding-top:8px;padding-bottom:8px}
+nav a{white-space:nowrap;color:var(--navy);text-decoration:none;font:500 13px 'IBM Plex Sans';padding:6px 10px;border-radius:6px}
+nav a:hover{background:#e6e1d6}
+section{padding:40px 0 34px;border-bottom:1px solid var(--line)}
+h2{font-size:26px;margin:0 0 6px}
+h2 .n{font:600 13px 'IBM Plex Mono';color:var(--live);display:block;letter-spacing:.1em}
+h3{font-size:17px;margin:22px 0 8px}
+.lead{color:var(--mut);max-width:880px;margin:0 0 18px}
+.fig{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;overflow:hidden}
+.fig h4{margin:0 0 6px;font:600 12px 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.fig svg{width:100%;height:auto;display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.5fr);gap:16px}
+.grid2e{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h5{margin:0 0 4px;font-size:15px}
+.card .tagc{font:600 11px 'IBM Plex Mono';color:var(--live)}
+.card p{margin:4px 0 0;font-size:14px;color:#33404c}
+@media(max-width:920px){.grid2,.grid2e{grid-template-columns:1fr}}
+/* simulator */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 14px}
+.btn{border:0;cursor:pointer;font:600 14px 'IBM Plex Sans';padding:11px 18px;border-radius:999px;color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.25);user-select:none;-webkit-user-select:none;touch-action:none}
+.btn:active{transform:translateY(1px)}
+.b-start{background:#23894f}.b-stop{background:#c62d22}.b-es{background:#8f1b13}.b-ol{background:#c98a00}.b-pw{background:#41505e}
+.btn.on{outline:3px solid var(--amb);outline-offset:2px}
+.status{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.chip{font:600 12px 'IBM Plex Mono';padding:5px 10px;border-radius:6px;background:#e7e3da;color:#3b4652}
+.chip.ok{background:#d5f0df;color:#155c33}.chip.bad{background:#ffe1d6;color:#9a2b10}.chip.warn{background:#fff0c2;color:#7a5600}
+.msg{background:#0f2433;color:#e8f2f9;border-radius:10px;padding:12px 16px;font:14px/1.5 'IBM Plex Mono';min-height:48px;margin-bottom:14px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--mut);margin-top:10px}
+.legend i{display:inline-block;width:22px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #ece8df;vertical-align:top}
+th{background:#ece8df;font:600 12px 'IBM Plex Mono';text-transform:uppercase;letter-spacing:.05em}
+td code,p code,li code{font:600 12.5px 'IBM Plex Mono';background:#f0ece3;padding:1px 5px;border-radius:4px}
+.tbl{overflow-x:auto}
+ol.seq li,ul.pts li{margin-bottom:6px}
+.warnbox{background:#fff4d6;border:1px solid #e9c46a;border-radius:10px;padding:12px 16px;font-size:14px}
+footer{padding:28px 0 50px;color:var(--mut);font-size:13px}
+/* ---- SVG drawing styles ---- */
+.w{stroke:#17212b;stroke-width:1.6;fill:none;stroke-linecap:round;transition:stroke .15s,stroke-width .15s}
+.w.live{stroke:var(--live);stroke-width:2.8}
+.w.dash{stroke:#6b7785;stroke-width:1.1;stroke-dasharray:5 4}
+.w.ilk{stroke:#8a2be2;stroke-width:1.4;stroke-dasharray:2 3}
+.w.pe{stroke:#3a9d4a;stroke-width:2;stroke-dasharray:6 3}
+.dot{fill:#17212b}.dot.live{fill:var(--live)}
+.tm{fill:#fff;stroke:#17212b;stroke-width:1.4}
+.ct .bar{stroke:#17212b;stroke-width:2}
+.ct .bridge{stroke:var(--grn);stroke-width:3.4;opacity:0;transition:opacity .15s;stroke-linecap:round}
+.ct.closed .bridge{opacity:1}.ct.closed .open{opacity:.18}
+.pb .stem{stroke:#17212b;stroke-width:1.2;stroke-dasharray:3 2}
+.pb .bar{stroke:#17212b;stroke-width:2.3}
+.pb .act{transition:transform .12s}
+.pb.pno.pressed .act{transform:translateY(6px)}
+.pb.pnc.pressed .act{transform:translateY(8px)}
+.mush{fill:#d62d20;stroke:#7a130c}
+.coil rect{fill:#fff;stroke:#17212b;stroke-width:1.8;transition:fill .15s}
+.coil.on rect{fill:#ffd2c2;stroke:var(--live);stroke-width:2.4}
+.lamp circle{fill:#fff;stroke:#17212b;stroke-width:1.6;transition:fill .15s}
+.lamp .x{stroke:#17212b;stroke-width:1.2}
+.lamp.on.g circle{fill:#39c46f;filter:drop-shadow(0 0 5px #39c46f)}
+.lamp.on.wh circle{fill:#fff7cf;filter:drop-shadow(0 0 6px #ffe680)}
+.lamp.on.a circle{fill:#ffb400;filter:drop-shadow(0 0 6px #ffb400)}
+.tag{font:600 11px 'IBM Plex Mono';fill:#17212b}
+.term{font:9.5px 'IBM Plex Mono';fill:#5f6b78}
+.fn{font:500 11px 'IBM Plex Sans';fill:#0b3d5c}
+.motor{font:700 22px 'IBM Plex Sans';fill:#17212b}
+.wn rect{fill:#fff2b8;stroke:#c9a227}.wn text{font:600 9.5px 'IBM Plex Mono';fill:#5a4300}
+.rotor{fill:none;stroke:#9aa6b2;stroke-width:3;stroke-dasharray:10 8}
+.rotor.run{stroke:var(--live)}
+.w.wnd{stroke:#9aa6b2;stroke-dasharray:4 3}.w.wnd.live{stroke:var(--live);stroke-dasharray:none}
+.pipe{fill:none;stroke:#c3ccd5;stroke-width:9;stroke-linecap:round}
+.pipe.flow{stroke:#3b8fd9;stroke-dasharray:12 8;animation:flow .7s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+.bar{display:inline-block;width:170px;height:12px;background:#e7e3da;border-radius:6px;overflow:hidden;vertical-align:middle;align-self:center}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2e9e5b,#f2a900 45%,#e4572e);transition:width .1s}
+.slider{display:flex;align-items:center;gap:8px;font:500 13px 'IBM Plex Sans';background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.fz{fill:#fff;stroke:#17212b;stroke-width:1.4}
+.fer rect{fill:#fff;stroke:#c0392b;stroke-width:1}.fer text{font:600 8.5px 'IBM Plex Mono';fill:#c0392b}
+.pl{font:600 10px 'IBM Plex Mono';fill:#17212b}
+.pls{font:9px 'IBM Plex Mono';fill:#5f6b78}
+.pt{font:700 13px 'IBM Plex Sans';fill:#17212b}
+
+.xgrid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+@media(max-width:1000px){.xgrid{grid-template-columns:1fr}}
+.cfg{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.cfg fieldset{border:0;border-top:1px solid #ece8df;margin:8px 0 0;padding:8px 0 2px}
+.cfg legend{font:600 11px 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--live);padding:0 6px 0 0}
+.cfg label{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;margin:6px 0}
+.cfg label.pre{flex-direction:column;align-items:stretch;font-weight:600}
+.cfg select,.cfg input[type=number]{font:500 13px 'IBM Plex Sans';padding:5px 6px;border:1px solid #cfc8ba;border-radius:6px;background:#fbfaf7;max-width:185px}
+.cfg label.pre select{max-width:none}
+.cfg input[type=range]{width:120px;vertical-align:middle}
+.cfg label span b{font:600 12px 'IBM Plex Mono';display:inline-block;min-width:42px;text-align:right}
+.applyb{width:100%;margin-top:10px;background:var(--navy)!important}
+.assess{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;line-height:1.45}
+.assess h4{margin:0 0 4px;font:600 12px 'IBM Plex Mono';letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.assess .row{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f0ece3}
+.assess .ic{flex:0 0 18px;font-weight:700}
+.i-ok{color:#1d7a45}.i-w{color:#b07800}.i-x{color:#c0392b}.i-i{color:#0b3d5c}.i-r{color:#e4572e}
+.read{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px}
+.rd{background:#0f2433;color:#e8f2f9;border-radius:10px;padding:8px 12px;transition:background .2s}
+.rd small{display:block;font:600 10px 'IBM Plex Mono';letter-spacing:.08em;color:#8fb3cc;text-transform:uppercase}
+.rd b{display:block;font:600 20px 'IBM Plex Mono'}
+.rd span{font:11px 'IBM Plex Mono';color:#b9cbd8}
+.rd.alert{background:#8a1f0f}.rd.warnr{background:#6b5200}
+#x-chart{width:100%;height:190px;display:block}
+.log{font:12.5px/1.55 'IBM Plex Mono';max-height:200px;overflow:auto}
+.lg-x{color:#c0392b}.lg-w{color:#9a6a00}.lg-ok{color:#1d7a45}.lg-i{color:#33404c}
+.link{fill:#d4a017;stroke:#7a5c00;stroke-width:1.2}
+.wc{fill:#fff;stroke:#17212b;stroke-width:1.6}.wc.live{fill:#ffd2c2;stroke:var(--live)}
+.scr{fill:#fff;stroke:#17212b;stroke-width:1.3}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Marine electrical · Motor control basics</div>
+    <h1>Motor Control Wiring for Large Merchant Vessels</h1>
+    <p>A learning reference for the magnetic-contactor <b>Direct-On-Line (DOL) start/stop</b> starter: the power circuit, the control (ladder) circuit, how the panel is actually laid out and wired with ferrule numbers, and the extras you meet on ships: forward/reverse, star-delta, remote emergency stops, blackout restart and IT-system earth faults.</p>
+    <div class="pills"><span class="pill">440 V · 3φ · 60 Hz (insulated / IT)</span><span class="pill">110 V AC control via transformer</span><span class="pill">IEC device tags &amp; terminal numbers</span><span class="pill">Full-scale configurable simulator</span><span class="pill">Supply 220–690 V · 50/60 Hz</span><span class="pill">Star / Delta / Y-Δ · DOL · Rev · Soft starter · VFD</span></div>
+  </div>
+</header>
+<nav><div class="wrap">
+  <a href="#full"><b>0 · Full simulator</b></a><a href="#sim">1 · DOL sim</a><a href="#panel">2 · Panel layout</a><a href="#schedule">3 · Wire schedule</a><a href="#sequence">4 · Sequence</a><a href="#parts">5 · Components</a><a href="#fwdrev">6 · Fwd/Rev sim</a><a href="#stardelta">7 · Star-Delta sim</a><a href="#standby">8 · Duty/Standby sim</a><a href="#methods">9 · Starting methods</a><a href="#marine">10 · Ship rules</a><a href="#numbers">11 · Terminal numbers</a><a href="#faults">12 · Fault-finding</a>
+</div></nav>
+
+<main class="wrap">
+
+<section id="full">
+  <h2><span class="n">00</span>Full-scale motor starter simulator</h2>
+  <p class="lead">Set up a real installation: ship supply voltage and frequency, generator size, motor nameplate, star or delta, starting method, control voltage, load and overload setting. The <b>power circuit, control ladder and terminal-box links redraw automatically</b>. The checks tell you if the combination is wrong, and the simulation calculates real physics: torque–speed curve, inrush current, generator voltage dip, overload relay heating, winding temperature, stall and burnout. Try the presets, including the deliberately <b>wrong</b> ones.</p>
+  <div class="xgrid">
+    <div>
+      <div class="cfg">
+        <label class="pre">Scenario <select id="x-pre"></select></label>
+        <fieldset><legend>Ship supply</legend>
+          <label>Voltage <select data-k="V" data-n></select></label>
+          <label>Frequency <select data-k="f" data-n></select></label>
+          <label>Generator online <select data-k="gen" data-n></select></label>
+        </fieldset>
+        <fieldset><legend>Motor nameplate</legend>
+          <label>Voltage Δ / Y <select data-k="mot"></select></label>
+          <label>Rated frequency <select data-k="mf" data-n></select></label>
+          <label>Rated power <select data-k="kw" data-n></select></label>
+        </fieldset>
+        <fieldset><legend>Driven load</legend>
+          <label>Load type <select data-k="load"><option value="pump">Centrifugal pump</option><option value="fan">Fan / blower</option><option value="compressor">Compressor (const. torque)</option><option value="winch">Winch / crane</option></select></label>
+          <label>Load (live) <span><input type="range" data-k="lp" data-n data-live data-u=" %" min="0" max="130" step="5"><b></b></span></label>
+        </fieldset>
+        <fieldset><legend>Starter</legend>
+          <label>Method <select data-k="method"><option value="dol">DOL (direct on line)</option><option value="rev">Reversing DOL (FWD/REV)</option><option value="yd">Star-Delta (Y-Δ)</option><option value="ss">Soft starter</option><option value="vfd">VFD / inverter</option></select></label>
+          <label id="x-connrow">Motor connection <select data-k="conn"><option value="auto">Auto (correct)</option><option value="Y">Star (Y)</option><option value="D">Delta (Δ)</option></select></label>
+          <label data-show="yd">KT star time <span><input type="range" data-k="kt" data-n data-live data-u=" s" min="1" max="15" step="1"><b></b></span></label>
+          <label data-show="ss">Initial voltage <span><input type="range" data-k="ssU0" data-n data-live data-u=" %" min="25" max="80" step="5"><b></b></span></label>
+          <label data-show="ss">Ramp time <span><input type="range" data-k="ssT" data-n data-live data-u=" s" min="2" max="30" step="1"><b></b></span></label>
+          <label data-show="vfd">Accel time <span><input type="range" data-k="vfdT" data-n data-live data-u=" s" min="2" max="30" step="1"><b></b></span></label>
+          <label data-show="vfd">Speed setpoint <span><input type="range" data-k="vfdSp" data-n data-live data-u=" %" min="20" max="110" step="5"><b></b></span></label>
+        </fieldset>
+        <fieldset><legend>Control &amp; protection</legend>
+          <label>Control voltage <select data-k="cv"><option value="24dc">24 V DC (PSU)</option><option value="110ac">110 V AC (transformer)</option><option value="230ac">230 V AC (transformer)</option><option value="line">Line voltage (no transformer)</option></select></label>
+          <label>F2 setting automatic <input type="checkbox" data-k="olAuto" data-live></label>
+          <label>F2 setting (A) <input type="number" data-k="ol" data-n data-live step="0.1" min="0.1" id="x-olin"></label>
+          <label>Simulation speed <select data-k="spd" data-n data-live><option value="1">× 1 real time</option><option value="3">× 3</option><option value="10">× 10</option></select></label>
+        </fieldset>
+        <button class="btn applyb" id="x-apply">★ Apply recommended setup</button>
+      </div>
+      <div class="assess" id="x-assess"></div>
+    </div>
+    <div>
+      <div class="controls">
+        <button class="btn b-start" id="x-bS">▶ START (hold)</button>
+        <button class="btn" style="background:#1f6fb2;display:none" id="x-bR">⟲ REV (hold)</button>
+        <button class="btn b-stop" id="x-bT">■ STOP (hold)</button>
+        <button class="btn b-es" id="x-bE">⏻ E-STOP</button>
+        <button class="btn b-ol" id="x-bF">↺ Reset trips</button>
+        <button class="btn b-pw" id="x-bP">⚡ Blackout</button>
+        <button class="btn" style="background:#5b6876" id="x-bX">⟲ Reset sim</button>
+      </div>
+      <div class="read" id="x-read"></div>
+      <div class="msg" id="x-msg">Choose a scenario or set your own, then hold START.</div>
+      <div class="fig" style="margin-bottom:14px"><h4>Trend — last 30 s (sim time)</h4><canvas id="x-chart"></canvas></div>
+      <div class="fig" style="margin-bottom:14px"><h4>Motor connection — terminal box &amp; windings (updates live)</h4><svg id="x-cn" viewBox="0 0 640 330"></svg></div>
+      <div class="fig"><h4>Event log</h4><div class="log" id="x-log"></div></div>
+    </div>
+  </div>
+  <div class="grid2e" style="margin-top:16px">
+    <div class="fig"><h4 id="x-pwt">Power circuit</h4><svg id="x-pw" viewBox="0 0 520 590"></svg></div>
+    <div class="fig"><h4 id="x-ldt">Control circuit</h4><svg id="x-ld" viewBox="0 0 820 480"></svg></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--live)"></i>energised</span><span><i style="background:var(--grn)"></i>contact closed</span><span><i style="background:#d4a017"></i>brass terminal links</span><span>Model: Kloss torque curve, I²t overload class 10, generator x″d = 0.15 with AVR, ship ambient 45 °C. Illustrative values for training.</span></div>
+</section>
+
+<section id="sim">
+  <h2><span class="n">01</span>DOL starter: power + control circuit (interactive)</h2>
+  <p class="lead">The most common starter on board: pumps, fans, compressors, purifiers. Press and hold <b>START</b>, then release it: the contactor stays in because of its own <code>13-14</code> “seal-in” (holding) contact. Try STOP, the remote E-stop, an overload trip and a blackout. <span style="color:var(--live);font-weight:600">Red</span> = energised wire, <span style="color:var(--grn);font-weight:600">green bar</span> = contact closed.</p>
+  <div class="controls">
+    <button class="btn b-start" id="bStart">▶ START (hold)</button>
+    <button class="btn b-stop" id="bStop">■ STOP (hold)</button>
+    <button class="btn b-es" id="bEs">⏻ Remote E-STOP</button>
+    <button class="btn b-ol" id="bOl">⚠ Simulate overload trip</button>
+    <button class="btn b-pw" id="bPw">⚡ Blackout (cut supply)</button>
+  </div>
+  <div class="status" id="chips"></div>
+  <div class="msg" id="msg">Supply healthy. Motor stopped. H2 “STOPPED” lamp on. Press and hold START.</div>
+  <div class="grid2">
+    <div class="fig"><h4>Power circuit — 440 V</h4><svg id="svgPower" viewBox="0 0 460 610"></svg></div>
+    <div class="fig"><h4>Control circuit — 110 V AC ladder (wire numbers in yellow)</h4><svg id="svgLadder" viewBox="0 0 820 500"></svg></div>
+  </div>
+  <div class="legend"><span><i style="background:var(--live)"></i>energised</span><span><i style="background:var(--grn)"></i>contact closed</span><span><i style="background:#fff2b8;border:1px solid #c9a227"></i>wire / ferrule number</span><span><i style="background:#6b7785"></i>dashed = mechanical link (same device)</span></div>
+</section>
+
+<section id="panel">
+  <h2><span class="n">02</span>Actual panel wiring layout</h2>
+  <p class="lead">How the same circuit looks inside a typical starter panel or MCC bucket. Power cables are colour-coded per IEC (L1 brown, L2 black, L3 grey). Control wires run inside the wire duct, so you trace them by the <b>ferrule numbers</b> (red tags) on both ends, not by following the wire. Every wire with the same number is the same electrical point.</p>
+  <div class="fig"><h4>Starter panel back plate (left) · door front view (right) · field cables (bottom)</h4><svg id="svgPanel" viewBox="0 0 930 800"></svg></div>
+</section>
+
+<section id="schedule">
+  <h2><span class="n">03</span>Wire schedule (point-to-point list)</h2>
+  <p class="lead">This is what the wireman works from and what you use when fault-finding with a multimeter. Control wire size is typically 1.0–1.5 mm² marine flexible; CT secondaries 2.5 mm².</p>
+  <div class="tbl"><table>
+    <tr><th>Wire no.</th><th>From</th><th>To</th><th>Function</th></tr>
+    <tr><td><code>L1 L2 L3</code></td><td>MCC busbar / incoming cable</td><td>Q1 : 1 / 3 / 5</td><td>440 V supply, cable sized for motor FLC + cable run</td></tr>
+    <tr><td>power</td><td>Q1 : 2 / 4 / 6</td><td>KM1 : 1/L1, 3/L2, 5/L3</td><td>Breaker to contactor</td></tr>
+    <tr><td>power</td><td>KM1 : 2/T1, 4/T2, 6/T3</td><td>F2 (plugs directly under KM1)</td><td>Through the overload heaters</td></tr>
+    <tr><td><code>U1 V1 W1 PE</code></td><td>F2 : 2/T1, 4/T2, 6/T3</td><td>X1 : U1 V1 W1 → motor terminal box</td><td>Motor cable 3C + earth</td></tr>
+    <tr><td><code>L1.1 L2.1</code></td><td>Q1 : 2 / Q1 : 4</td><td>F3 / F4 → T1 primary 440 V</td><td>Control transformer supply (fused)</td></tr>
+    <tr><td><code>1</code></td><td>T1 sec 110 V</td><td>F5 in</td><td>Control supply before fuse</td></tr>
+    <tr><td><code>2</code></td><td>F5 out</td><td>F2:95, F2:97, KM1:23, KM1:31</td><td>Fused 110 V control “line”</td></tr>
+    <tr><td><code>3</code></td><td>F2:96</td><td>X1:3 → remote E-stop S0</td><td>After overload NC contact</td></tr>
+    <tr><td><code>4</code></td><td>X1:4 (E-stop return)</td><td>Door: S1 STOP 11</td><td>After E-stop</td></tr>
+    <tr><td><code>5</code></td><td>S1:12</td><td>S2 START 13, X1:5 → KM1:13</td><td>After STOP</td></tr>
+    <tr><td><code>6</code></td><td>S2:14 (via X1:6)</td><td>KM1:14 and KM1:A1</td><td>Coil feed + seal-in</td></tr>
+    <tr><td><code>7</code></td><td>KM1:24</td><td>X1:7 → H1 RUNNING</td><td>Run lamp</td></tr>
+    <tr><td><code>8</code></td><td>KM1:32</td><td>X1:8 → H2 STOPPED</td><td>Stop / ready lamp</td></tr>
+    <tr><td><code>9</code></td><td>F2:98</td><td>X1:9 → H3 O/L TRIP</td><td>Trip lamp</td></tr>
+    <tr><td><code>0</code></td><td>T1 sec 0</td><td>KM1:A2, X1:0 → H1/H2/H3 common</td><td>Control return</td></tr>
+    <tr><td><code>21 22</code></td><td>KM1:43 / 44</td><td>X1:21 / 22 → AMS</td><td>Potential-free “running” signal to alarm &amp; monitoring system</td></tr>
+    <tr><td><code>S1 S2</code></td><td>CT on V phase</td><td>P1 ammeter (door)</td><td>Motor current indication. Never open-circuit a CT secondary while running.</td></tr>
+  </table></div>
+</section>
+
+<section id="sequence">
+  <h2><span class="n">04</span>Sequence of operation</h2>
+  <div class="grid2e">
+    <ol class="seq">
+      <li><b>Q1 closed</b> → 440 V at KM1 line terminals and at T1 via F3/F4. T1 gives 110 V; through F5 this becomes wire <code>2</code>.</li>
+      <li>Wire 2 → F2 <code>95-96</code> (closed) → wire 3 → E-stop S0 (closed) → wire 4 → STOP S1 (closed) → wire 5. KM1 <code>31-32</code> is closed, so <b>H2 STOPPED</b> is lit.</li>
+      <li><b>Press START S2</b>: 5 connects to 6, so KM1 coil A1-A2 is energised. The main contacts close and the motor starts. At the same time KM1 <code>13-14</code> closes across START.</li>
+      <li><b>Release START</b>: the coil stays energised through 13-14. This is the <b>seal-in / holding / latching</b> contact. H1 RUNNING on, H2 off, AMS gets the running signal via 43-44.</li>
+    </ol>
+    <ol class="seq" start="5">
+      <li><b>Press STOP</b> (or remote E-stop): the series circuit opens, the coil drops, 13-14 opens. Releasing STOP does <i>not</i> restart: the seal is gone.</li>
+      <li><b>Overload</b>: F2 heaters bend the bimetal → <code>95-96</code> opens (coil drops), <code>97-98</code> closes (H3 TRIP). Manual reset only after the cause is found.</li>
+      <li><b>Blackout / low voltage</b>: the coil can’t hold, so the contactor drops out. This gives <b>no-volt (undervoltage) release</b> automatically; the motor will not restart on its own when power returns. On ships, essential pumps are restarted deliberately by a sequential-restart system (see section 8).</li>
+    </ol>
+  </div>
+</section>
+
+<section id="parts">
+  <h2><span class="n">05</span>The components and what each one does</h2>
+  <div class="cards">
+    <div class="card"><span class="tagc">Q1</span><h5>MCCB / motor protection breaker</h5><p>Isolates the starter and clears short circuits. Its breaking capacity must suit the prospective fault level at the switchboard. Ship generators running in parallel give high fault currents. Lockable OFF for isolation.</p></div>
+    <div class="card"><span class="tagc">KM1</span><h5>Magnetic contactor</h5><p>An electromagnet (coil A1-A2) pulls in 3 main poles and the auxiliary contacts. Choose it by <b>AC-3</b> rating (squirrel-cage motor start/stop) at 440 V, not just the amps on the label. Coil voltage must match control voltage (110 V AC here).</p></div>
+    <div class="card"><span class="tagc">F2</span><h5>Thermal overload relay</h5><p>Three bimetal heaters in the motor current. Set the dial to the motor nameplate FLC. NC <code>95-96</code> in the coil circuit, NO <code>97-98</code> for alarm. Trip class 10 for normal starts. Electronic relays also detect phase loss.</p></div>
+    <div class="card"><span class="tagc">T1 · F3 F4 F5</span><h5>Control transformer + fuses</h5><p>Steps 440 V down to 110 V so pushbuttons and lamps are at a safer voltage. It also gives the starter its own undervoltage release. F3/F4 protect the primary, F5 protects the control circuit.</p></div>
+    <div class="card"><span class="tagc">S1 · S2</span><h5>STOP (NC) &amp; START (NO) pushbuttons</h5><p>Stops are <b>NC and in series</b>: any one opens the circuit. Starts are <b>NO and in parallel</b>: any one closes it. This is how you add extra local/remote stations.</p></div>
+    <div class="card"><span class="tagc">S0</span><h5>Remote emergency stop</h5><p>Latching mushroom or break-glass unit located <b>outside</b> the space (for fuel-oil pumps, purifiers, ventilation fans). Wired as a loop (3 out, 4 back), so a broken cable stops the motor: fail-safe.</p></div>
+    <div class="card"><span class="tagc">H1 H2 H3</span><h5>Indicator lamps</h5><p>Green = running, white = stopped/ready, amber = tripped. Colour meanings vary between yards, so follow the vessel’s drawing legend. LED cluster lamps are common now.</p></div>
+    <div class="card"><span class="tagc">X1</span><h5>Terminal strip</h5><p>Every wire that leaves the panel (motor, door, remote stations, AMS) lands here. Numbered to match the ferrules. This is where you take measurements and isolate field cables.</p></div>
+    <div class="card"><span class="tagc">CT · P1</span><h5>Current transformer + ammeter</h5><p>Lets the engineer watch the load (e.g. pump current rising = clogged strainer or bearing problem). Never open the CT secondary circuit under load: dangerous high voltage.</p></div>
+    <div class="card"><span class="tagc">R1 (option)</span><h5>Anti-condensation heater</h5><p>Motors in damp engine rooms and on deck have a space heater. It is switched on via a KM1 <b>NC</b> contact so it heats only while the motor is stopped. It is normally fed from a separate 220 V circuit.</p></div>
+  </div>
+</section>
+
+<section id="fwdrev">
+  <h2><span class="n">06</span>Forward / Reverse starter: simulation</h2>
+  <p class="lead">Used for the windlass, mooring winches, cranes, hatch covers and provision lifts. KM2 swaps L1 and L3 to reverse the motor. If both contactors close together you get a <b>phase-to-phase short circuit</b>, so there are three interlocks: <b>electrical</b> (KM2 <code>21-22</code> in KM1’s coil circuit and vice versa), <b>pushbutton</b> (each direction button’s NC contact breaks the other rung) and <b>mechanical</b> (a lever between the contactors). Try pressing REV while running forward and watch the current meter. That is “plugging”.</p>
+  <div class="controls">
+    <button class="btn b-start" id="frF">⟳ FWD (hold)</button>
+    <button class="btn" style="background:#1f6fb2" id="frR">⟲ REV (hold)</button>
+    <button class="btn b-stop" id="frS">■ STOP (hold)</button>
+    <button class="btn b-es" id="frE">⏻ E-STOP</button>
+    <button class="btn b-ol" id="frO">⚠ Overload trip</button>
+    <button class="btn b-pw" id="frP">⚡ Blackout</button>
+  </div>
+  <div class="status" id="fr-chips"></div>
+  <div class="msg" id="fr-msg">Stopped. Hold FWD or REV to start.</div>
+  <div class="grid2">
+    <div class="fig"><h4>Power</h4><svg id="svgFRp" viewBox="0 0 400 445"></svg></div>
+    <div class="fig"><h4>Control</h4><svg id="svgFRc" viewBox="0 0 820 310"></svg></div>
+  </div>
+</section>
+
+<section id="stardelta">
+  <h2><span class="n">07</span>Star-Delta starter: simulation</h2>
+  <p class="lead">Used for large pumps: fire, ballast, sea-water cooling, cargo/stripping. The motor starts in <b>star</b> (KM1 + KM2), so each winding gets 440/√3 ≈ 254 V. That cuts starting current and torque to about ⅓ of DOL and the generators don’t see a big voltage dip. When timer KT runs out, KM2 opens and KM3 closes for <b>delta</b>. F2 carries winding current, so set it to <b>FLC × 0.58</b>. Try setting KT too short (1 s) and watch the current peak at changeover.</p>
+  <div class="controls">
+    <button class="btn b-start" id="ydS2">▶ START (hold)</button>
+    <button class="btn b-stop" id="ydS1">■ STOP (hold)</button>
+    <button class="btn b-es" id="ydE">⏻ E-STOP</button>
+    <button class="btn b-ol" id="ydO">⚠ Overload trip</button>
+    <button class="btn b-pw" id="ydP">⚡ Blackout</button>
+    <label class="slider">KT timer <input type="range" id="ydT" min="1" max="10" step="1" value="4"> <b id="ydTv">4 s</b></label>
+  </div>
+  <div class="status" id="yd-chips"></div>
+  <div class="msg" id="yd-msg">Stopped. Hold START, then release.</div>
+  <div class="grid2">
+    <div class="fig"><h4>Power</h4><svg id="svgYDp" viewBox="0 0 560 490"></svg></div>
+    <div class="fig"><h4>Control</h4><svg id="svgYDc" viewBox="0 0 820 400"></svg></div>
+  </div>
+</section>
+
+<section id="standby">
+  <h2><span class="n">08</span>Duty / Standby pump auto-changeover: simulation</h2>
+  <p class="lead">Every essential pump pair on board works this way: LO, jacket FW, SW cooling, fuel supply, steering hydraulics. No.1 runs as <b>duty</b>. If discharge pressure falls below the pressure switch setting (here 2.5 bar) for longer than the KT delay (3 s), the <b>standby</b> No.2 starts automatically, latches in and raises an alarm. The delay stops a false changeover during normal start-up. Trip No.1 and watch.</p>
+  <div class="controls">
+    <button class="btn b-start" id="dsA1">▶ No.1 START</button>
+    <button class="btn b-stop" id="dsB1">■ No.1 STOP</button>
+    <button class="btn b-ol" id="dsO1">⚠ Trip No.1</button>
+    <button class="btn b-start" style="background:#1f6fb2" id="dsA2">▶ No.2 START</button>
+    <button class="btn b-stop" id="dsB2">■ No.2 STOP</button>
+    <button class="btn b-ol" id="dsO2">⚠ Trip No.2</button>
+    <button class="btn b-pw" id="dsAu">AUTO selected</button>
+  </div>
+  <div class="status" id="ds-chips"></div>
+  <div class="msg" id="ds-msg">No.1 running as duty, pressure normal, AUTO selected. Try “Trip No.1”.</div>
+  <div class="grid2">
+    <div class="fig"><h4>System mimic</h4><svg id="svgDSm" viewBox="0 0 460 400"></svg></div>
+    <div class="fig"><h4>Control</h4><svg id="svgDSc" viewBox="0 0 820 620"></svg></div>
+  </div>
+</section>
+
+<section id="methods">
+  <h2><span class="n">09</span>Which starting method? (recommendations)</h2>
+  <p class="lead">A ship’s generators have limited capacity, so the main reason to avoid DOL on big motors is the <b>voltage dip</b> it causes. That dip can drop out other contactors or even black out the ship. Values below are typical figures; check the maker’s data.</p>
+  <div class="tbl"><table>
+    <tr><th>Method</th><th>Start current</th><th>Start torque</th><th>Typical use on board</th><th>Remarks</th></tr>
+    <tr><td><b>DOL</b></td><td>6–8 × FLC</td><td>Full (high)</td><td>Small–medium pumps, fans, compressors, purifiers</td><td>Simplest, cheapest, most reliable. Limited by generator size.</td></tr>
+    <tr><td><b>Star-Delta</b></td><td>≈ ⅓ of DOL (2–2.5 × FLC)</td><td>≈ ⅓ of DOL</td><td>SW cooling, fire, ballast, cargo pumps</td><td>Needs 6-terminal motor, delta-rated at 440 V. Light start load only. Current peak at changeover.</td></tr>
+    <tr><td><b>Autotransformer</b></td><td>≈ 40–65 % of DOL (tap 65/80 %)</td><td>Same fraction as current</td><td>Large pumps, older bow-thruster starters</td><td>Better torque per amp than Y-Δ. Bigger and heavier. Uses 3-terminal motor.</td></tr>
+    <tr><td><b>Soft starter</b></td><td>2–4 × FLC (adjustable)</td><td>Reduced, ramps up</td><td>Pumps, compressors, fans</td><td>Smooth ramp, less water hammer. Has a bypass contactor after start. Produces some harmonics.</td></tr>
+    <tr><td><b>VFD / inverter</b></td><td>≈ 1–1.5 × FLC</td><td>Full from zero speed</td><td>ER ventilation fans, SW pumps (energy saving), cranes, thrusters, electric propulsion</td><td>Speed control and big energy savings on fans and pumps. Watch harmonics/filters, EMC, motor insulation and bearing currents.</td></tr>
+  </table></div>
+  <div class="cards" style="margin-top:14px">
+    <div class="card"><span class="tagc">Recommend</span><h5>Learn in this order</h5><p>1) DOL start/stop. 2) Remote/extra stations (stops in series, starts in parallel). 3) Forward/Reverse interlocks. 4) Star-Delta timing. 5) Duty/standby with pressure switch. 6) Sequential restart and preferential trip. 7) Soft starter and VFD parameters.</p></div>
+    <div class="card"><span class="tagc">Recommend</span><h5>Local / Remote / Auto selector</h5><p>Most ER starters have a selector: <b>Local</b> (buttons on the starter), <b>Remote</b> (ECR console or AMS) and <b>Auto</b> (pressure/level/temperature switch). The selector contacts route which START contacts are active. Stops normally work in every position.</p></div>
+    <div class="card"><span class="tagc">Recommend</span><h5>Level / float control</h5><p>Bilge, sewage, hydrophore and FW pumps start and stop on two level switches (high = start, low = stop). It is the same seal-in idea: HIGH acts as START and LOW acts as STOP.</p></div>
+  </div>
+</section>
+
+<section id="marine">
+  <h2><span class="n">10</span>What is different on a ship</h2>
+  <p class="lead">The starter circuits are the same as ashore. The difference is the system around them, required by SOLAS and the classification society (ABS, DNV, LR, BV, NK, KR and others).</p>
+  <div class="cards">
+    <div class="card"><span class="tagc">Insulated system</span><h5>IT (unearthed) distribution</h5><p>Most 440 V ship systems have an insulated neutral. A <b>first earth fault does not trip</b> anything. It shows on earth lamps or the insulation monitor and raises an alarm. You must find and clear it quickly, because a second earth fault on another phase is a short circuit.</p></div>
+    <div class="card"><span class="tagc">Blackout recovery</span><h5>Sequential restart</h5><p>After a blackout every contactor drops out. Essential services (steering gear, lube oil, cooling water, fuel pumps) are then restarted in timed groups so the restored generator is not overloaded by all starting currents at once.</p></div>
+    <div class="card"><span class="tagc">Generator overload</span><h5>Preferential trip</h5><p>Non-essential loads (galley, air-con, reefer groups, etc.) are tripped in stages by the preferential-trip relay when a generator is overloaded. This keeps propulsion and essential services running.</p></div>
+    <div class="card"><span class="tagc">SOLAS</span><h5>Remote stops outside the space</h5><p>Fuel-oil transfer/service pumps, purifiers and machinery-space ventilation fans must be stoppable from outside the space (fire control station). They are wired as the S0 loop shown above.</p></div>
+    <div class="card"><span class="tagc">SOLAS</span><h5>Steering gear motors</h5><p>Steering gear is <b>not</b> stopped by overload. It has short-circuit protection only, plus an <b>overload alarm</b> and phase-failure alarm on the bridge and in the ECR. It is fed by two separate circuits from the main switchboard (one may go via the emergency switchboard).</p></div>
+    <div class="card"><span class="tagc">Duty / standby</span><h5>Automatic changeover</h5><p>Paired pumps (LO, FW, SW, fuel): if the running pump’s discharge pressure drops (pressure switch) or it trips, the standby pump starts automatically and an alarm is raised. This adds a <i>Local/Remote/Auto</i> selector and a pressure-switch contact in parallel with START.</p></div>
+    <div class="card"><span class="tagc">Environment</span><h5>Vibration, salt, humidity</h5><p>Use marine type-approved cable (IEC 60092 series), crimped bootlace ferrules, and cable glands of the right size. Enclosure IP rating must suit the location: higher in machinery spaces and on open deck than in the ECR. Re-tighten terminals during planned maintenance.</p></div>
+    <div class="card"><span class="tagc">Higher power</span><h5>HV motors (6.6 kV)</h5><p>Large vessels often feed bow thrusters, cargo pumps or reefer plant at 6.6 kV with vacuum contactors and protection relays. The control principle (coil, seal-in, stops in series) is the same, but HV work needs HV-authorised personnel and procedures.</p></div>
+  </div>
+</section>
+
+<section id="numbers">
+  <h2><span class="n">11</span>Terminal numbering cheat sheet (IEC / EN 50005 &amp; 50012)</h2>
+  <div class="grid2e">
+    <div class="tbl"><table>
+      <tr><th>Marking</th><th>Meaning</th></tr>
+      <tr><td><code>1/L1 3/L2 5/L3</code></td><td>Main pole, supply side (odd numbers)</td></tr>
+      <tr><td><code>2/T1 4/T2 6/T3</code></td><td>Main pole, load/motor side (even numbers)</td></tr>
+      <tr><td><code>A1 – A2</code></td><td>Contactor / relay coil</td></tr>
+      <tr><td><code>x3 – x4</code></td><td>NO auxiliary contact (e.g. 13-14, 23-24, 43-44)</td></tr>
+      <tr><td><code>x1 – x2</code></td><td>NC auxiliary contact (e.g. 21-22, 31-32)</td></tr>
+      <tr><td><code>95 – 96</code></td><td>Overload relay NC (trip contact in coil circuit)</td></tr>
+      <tr><td><code>97 – 98</code></td><td>Overload relay NO (trip alarm/lamp)</td></tr>
+      <tr><td><code>x5 – x6 / x7 – x8</code></td><td>Timer contacts: timed NC / timed NO (e.g. KT 55-56, 67-68)</td></tr>
+    </table></div>
+    <div class="tbl"><table>
+      <tr><th>Tag</th><th>Device (classic IEC letters, widely used on ships)</th></tr>
+      <tr><td><code>Q</code></td><td>Circuit breaker / isolator</td></tr>
+      <tr><td><code>KM</code></td><td>Power contactor (newer IEC 81346 drawings use <code>QA</code>)</td></tr>
+      <tr><td><code>KA / KT</code></td><td>Auxiliary relay / timer relay</td></tr>
+      <tr><td><code>F</code></td><td>Fuse, overload relay</td></tr>
+      <tr><td><code>S</code></td><td>Pushbutton, selector, pressure/float switch</td></tr>
+      <tr><td><code>H</code></td><td>Indicator lamp, buzzer</td></tr>
+      <tr><td><code>T</code></td><td>Transformer (control or CT)</td></tr>
+      <tr><td><code>X</code></td><td>Terminal strip</td></tr>
+      <tr><td><code>M</code></td><td>Motor</td></tr>
+    </table></div>
+  </div>
+  <p style="font-size:14px;color:var(--mut)">The first digit of an auxiliary contact number is its position on the contactor (1st, 2nd, 3rd…). The second digit gives its function: 1-2 = NC, 3-4 = NO.</p>
+</section>
+
+<section id="faults">
+  <h2><span class="n">12</span>Fault-finding guide</h2>
+  <div class="warnbox" style="margin-bottom:14px"><b>Safety first:</b> work under a permit-to-work. Isolate Q1 and lock it out/tag it out (LOTO). <b>Prove dead</b> with a tester you have checked on a known live source. Remember that a panel can have more than one supply, such as the heater supply or the AMS loop. For insulation tests use a 500 V DC megger on the motor and cable, with electronics disconnected. Compare against the ship’s records. A commonly used minimum is 1 MΩ, but follow the maker’s and class figures.</div>
+  <div class="tbl"><table>
+    <tr><th>Symptom</th><th>Likely cause</th><th>What to check (voltages to wire 0)</th></tr>
+    <tr><td>Nothing works, no lamps</td><td>Q1 off/tripped, F3/F4 or F5 blown, T1 faulty</td><td>110 V at wire 1? at wire 2? 440 V on T1 primary?</td></tr>
+    <tr><td>H2 on, START does nothing</td><td>F2 tripped, E-stop latched or cable broken, STOP contact worn, open coil</td><td>Follow 110 V along 2 → 3 → 4 → 5. Where it disappears is the fault. Coil A1-A2 resistance (dead): open = coil burnt.</td></tr>
+    <tr><td>Runs only while START is held</td><td>Seal-in 13-14 missing, loose or wrong (wired to NC)</td><td>Check wires 5 and 6 on KM1 aux block. 13-14 must close when KM1 pulls in.</td></tr>
+    <tr><td>Contactor hums / chatters</td><td>Low control voltage, dirty/rusty pole faces, broken shading ring, loose wire 6 or 0</td><td>Measure 110 V across A1-A2 while pulling in. Clean or replace the contactor.</td></tr>
+    <tr><td>O/L trips repeatedly</td><td>Real overload (clogged pump, seized bearing), single phasing, wrong setting, high ambient</td><td>Clamp-meter all 3 phases and compare with nameplate FLC. Check for unequal currents and burnt KM1 contacts.</td></tr>
+    <tr><td>Motor hums, won’t turn / overheats</td><td>Single phasing: one main contact burnt, loose lug or blown fuse</td><td>440 V between all three phases at KM1 in and out, then at X1 U1-V1-W1.</td></tr>
+    <tr><td>Wrong rotation</td><td>Phase sequence swapped at motor or after maintenance</td><td>Isolate, then swap any two phases at the motor terminal box (not in the control circuit).</td></tr>
+    <tr><td>Earth lamp goes dark / IM alarm when this motor runs</td><td>Insulation breakdown in motor or cable (moisture common)</td><td>Isolate and megger each phase to earth at X1. Check that the anti-condensation heater works.</td></tr>
+  </table></div>
+</section>
+</main>
+<footer class="wrap">These are generic training diagrams. On board, always follow the vessel’s approved electrical drawings, the maker’s manuals, the class rules and the company SMS.</footer>
+
+<script>
+/* ---------- tiny SVG drawing kit ---------- */
+const T=(x,y,s,c='tag',a='middle')=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}">${s}</text>`;
+const L=(x1,y1,x2,y2,c='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="w ${c}"/>`;
+const DOT=(x,y,c='')=>`<circle cx="${x}" cy="${y}" r="3.2" class="dot ${c}"/>`;
+const WN=(x,y,n)=>`<g class="wn"><rect x="${x-10}" y="${y-21}" width="20" height="13" rx="3"/><text x="${x}" y="${y-11.5}" text-anchor="middle">${n}</text></g>`;
+const ID=id=>id?`id="${id}"`:'';
+function cont(nc,x,y,tag,t1,t2,id='',a='',b=''){
+  return `<g class="ct" ${ID(id)}>${L(x,y,x+15,y,a)}${L(x+25,y,x+40,y,b)}
+  <line class="bar" x1="${x+15}" y1="${y-9}" x2="${x+15}" y2="${y+9}"/><line class="bar" x1="${x+25}" y1="${y-9}" x2="${x+25}" y2="${y+9}"/>
+  ${nc?`<line class="bar" x1="${x+10}" y1="${y+10}" x2="${x+30}" y2="${y-10}"/>`:''}
+  <line class="bridge" x1="${x+15}" y1="${y}" x2="${x+25}" y2="${y}"/>
+  ${T(x+20,y-14,tag)}${T(x+14,y+21,t1,'term','end')}${T(x+26,y+21,t2,'term','start')}</g>`;
+}
+const NO=(...a)=>cont(false,...a), NC=(...a)=>cont(true,...a);
+function pb(nc,x,y,tag,t1,t2,id='',a='',b='',mush=false){
+  const by=nc?y+4:y-8;
+  return `<g class="pb ${nc?'pnc':'pno'}" ${ID(id)}>${L(x,y,x+9,y,a)}${L(x+31,y,x+40,y,b)}
+  <circle cx="${x+12}" cy="${y}" r="3" class="tm"/><circle cx="${x+28}" cy="${y}" r="3" class="tm"/>
+  <g class="act"><line class="bar" x1="${x+6}" y1="${by}" x2="${x+34}" y2="${by}"/><line class="stem" x1="${x+20}" y1="${by}" x2="${x+20}" y2="${y-20}"/>
+  ${mush?`<path class="mush" d="M${x+10},${y-20} A10,10 0 0 1 ${x+30},${y-20} Z"/>`:`<line class="bar" x1="${x+13}" y1="${y-20}" x2="${x+27}" y2="${y-20}"/>`}</g>
+  ${T(x+20,y-(mush?35:28),tag)}${T(x+14,y+21,t1,'term','end')}${T(x+26,y+21,t2,'term','start')}</g>`;
+}
+const PNO=(...a)=>pb(false,...a), PNC=(...a)=>pb(true,...a);
+function coil(x,y,tag,id='',a='',fn=''){
+  return `<g class="coil" ${ID(id)}>${L(x,y,x+6,y,a)}<rect x="${x+6}" y="${y-10}" width="28" height="20"/>${L(x+34,y,x+40,y)}
+  ${T(x+20,y-15,tag)}${T(x+4,y+22,'A1','term','start')}${T(x+36,y+22,'A2','term','end')}${fn?T(x+52,y-6,fn,'fn','start'):''}</g>`;
+}
+function lamp(x,y,tag,fn,col,id='',a=''){
+  const c=x+20,d=7;
+  return `<g class="lamp ${col}" ${ID(id)}>${L(x,y,x+10,y,a)}${L(x+30,y,x+40,y)}<circle cx="${c}" cy="${y}" r="10"/>
+  <line class="x" x1="${c-d}" y1="${y-d}" x2="${c+d}" y2="${y+d}"/><line class="x" x1="${c-d}" y1="${y+d}" x2="${c+d}" y2="${y-d}"/>
+  ${T(c,y-15,tag)}${T(x+52,y-6,fn,'fn','start')}</g>`;
+}
+function vKM(x,y,g='',ct='',cb=''){return L(x,y,x,y+8,ct)+`<path class="w ${ct}" d="M${x-4},${y+8} A4,4 0 0 0 ${x+4},${y+8}"/>`+`<g class="ct ${g}">${L(x,y+44,x-13,y+14,'open')}<line class="bridge" x1="${x}" y1="${y+12}" x2="${x}" y2="${y+44}"/></g>`+L(x,y+44,x,y+52,cb)}
+function vOL(x,y,c=''){return `<path class="w ${c}" d="M${x},${y} v10 h-5 v8 h10 v8 h-5 v14"/>`}
+
+/* ---------- DOL power circuit ---------- */
+function powerSVG(){
+  let s=T(160,16,'440 V · 3φ · 60 Hz — from MSB / MCC busbar','fn');
+  const X=[110,160,210],N=['L1','L2','L3'],M=['U1','V1','W1'];
+  X.forEach((x,i)=>{
+    s+=T(x,34,N[i])+L(x,40,x,100,'pin')+L(x-4,96,x+4,104)+L(x-4,104,x+4,96);
+    s+=`<g class="ct closed">${L(x,135,x-14,104,'open')}<line class="bridge" x1="${x}" y1="100" x2="${x}" y2="135"/></g>`;
+    s+=L(x,135,x,236,'pin')+`<path class="w pin" d="M${x-4},236 A4,4 0 0 0 ${x+4},236"/>`;
+    s+=`<g class="ct kmmain">${L(x,280,x-14,246,'open')}<line class="bridge" x1="${x}" y1="240" x2="${x}" y2="280"/></g>`;
+    s+=L(x,280,x,330,'pout')+`<path class="w pout" d="M${x},330 v8 h-5 v8 h10 v8 h-5 v12"/>`+L(x,366,x,449,'pout');
+    s+=`<circle cx="${x}" cy="452" r="3.5" class="tm"/>`+T(x+7,466,M[i],'term','start');
+  });
+  s+=L(46,120,203,120,'dash')+T(18,118,'Q1','tag','start')+T(18,131,'MCCB','term','start');
+  s+=L(46,262,203,262,'dash')+T(18,258,'KM1','tag','start')+T(18,271,'main','term','start');
+  s+=`<rect x="90" y="324" width="138" height="48" class="w dash"/>`+T(18,345,'F2','tag','start')+T(18,358,'O/L','term','start');
+  s+=`<circle cx="160" cy="405" r="8" class="w"/>`+L(168,405,226,405,'dash')+T(230,409,'CT → P1 ammeter','term','start');
+  s+=L(110,455,128,491,'pout')+L(160,455,160,477,'pout')+L(210,455,192,491,'pout');
+  s+=`<circle cx="160" cy="525" r="48" fill="#fff" stroke="#17212b" stroke-width="1.8"/><circle id="rotor" class="rotor" cx="160" cy="525" r="38"/>`;
+  s+=T(160,526,'M','motor')+T(160,546,'3~','fn');
+  s+=`<polyline points="200,552 240,578" class="w pe"/>`+L(228,580,252,580,'pe')+L(232,586,248,586,'pe')+L(236,592,244,592,'pe')+T(258,584,'PE → hull','term','start');
+  // control transformer tap
+  s+=DOT(160,165,'pin')+L(160,165,335,165,'pin')+L(335,165,335,200,'pin')+DOT(210,185,'pin')+L(210,185,375,185,'pin')+L(375,185,375,200,'pin');
+  s+=`<rect x="329" y="200" width="12" height="30" class="fz"/><rect x="369" y="200" width="12" height="30" class="fz"/>`+L(335,200,335,230,'pin')+L(375,200,375,230,'pin');
+  s+=L(335,230,335,267,'pin')+L(375,230,375,267,'pin');
+  s+=`<circle cx="355" cy="280" r="24" class="w"/><circle cx="355" cy="312" r="24" class="w"/>`;
+  s+=L(340,331,340,360,'pin')+`<rect x="334" y="360" width="12" height="28" class="fz"/>`+L(340,360,340,420,'pin')+L(370,331,370,420,'pin');
+  s+=T(392,219,'F3 · F4','term','start')+T(388,292,'T1','tag','start')+T(388,306,'440/110 V','term','start')+T(328,378,'F5','term','end');
+  s+=T(340,436,'2','tag')+T(370,436,'0','tag')+T(355,452,'to control ladder','term');
+  return s;
+}
+
+/* ---------- DOL ladder ---------- */
+function ladderSVG(){
+  let s=L(70,60,70,380,'n2')+L(760,60,760,380)+T(70,46,'2 · 110 V (after F5)','tag','start')+T(760,46,'0','tag','end');
+  [110,240,310,380].forEach(y=>{s+=DOT(70,y,'n2');s+=DOT(760,y)});
+  let y=110;
+  s+=L(70,y,100,y,'n2')+NC(100,y,'F2','95','96','f2nc','n2','n3')+L(140,y,180,y,'n3')+WN(160,y,3);
+  s+=PNC(180,y,'S0 E-STOP','11','12','s0','n3','n4',true)+L(220,y,260,y,'n4')+WN(240,y,4);
+  s+=PNC(260,y,'S1 STOP','11','12','s1','n4','n5')+L(300,y,360,y,'n5')+WN(318,y,5);
+  s+=PNO(360,y,'S2 START','13','14','s2','n5','n6')+L(400,y,600,y,'n6')+WN(520,y,6);
+  s+=coil(600,y,'KM1','km1coil','n6','contactor coil')+L(640,y,760,y);
+  s+=L(330,y,330,170,'n5')+L(330,170,360,170,'n5')+NO(360,170,'KM1','13','14','km13','n5','n6')+L(400,170,440,170,'n6')+L(440,170,440,y,'n6');
+  s+=DOT(330,y,'n5')+DOT(440,y,'n6')+T(470,190,'← seal-in (holding) contact','fn','start');
+  y=240; s+=L(70,y,100,y,'n2')+NO(100,y,'KM1','23','24','km23','n2','n7')+L(140,y,600,y,'n7')+WN(370,y,7)+lamp(600,y,'H1','RUNNING (green)','g','h1','n7')+L(640,y,760,y);
+  y=310; s+=L(70,y,100,y,'n2')+NC(100,y,'KM1','31','32','km31','n2','n8')+L(140,y,600,y,'n8')+WN(370,y,8)+lamp(600,y,'H2','STOPPED (white)','wh','h2','n8')+L(640,y,760,y);
+  y=380; s+=L(70,y,100,y,'n2')+NO(100,y,'F2','97','98','f2no','n2','n9')+L(140,y,600,y,'n9')+WN(370,y,9)+lamp(600,y,'H3','O/L TRIP (amber)','a','h3','n9')+L(640,y,760,y);
+  y=470; s+=T(70,436,'Separate potential-free contact → Alarm & Monitoring System (AMS)','fn','start');
+  s+=`<circle cx="80" cy="${y}" r="3.5" class="tm"/>`+T(80,y+18,'X1:21','term')+L(84,y,180,y)+NO(180,y,'KM1','43','44','km43')+L(220,y,316,y)+`<circle cx="320" cy="${y}" r="3.5" class="tm"/>`+T(320,y+18,'X1:22','term')+T(336,y+4,'“M1 RUNNING” feedback','term','start');
+  return s;
+}
+
+/* ---------- Panel physical layout ---------- */
+function panelSVG(){
+  const C={L1:'#8a5a2b',L2:'#1d1d1d',L3:'#8c8c8c',PE:'#3a9d4a'};
+  const pw=(p,c,w=4)=>`<polyline points="${p}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const cw=p=>`<polyline points="${p}" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-linejoin="round"/>`;
+  const sc=(x,y,r=4.5)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#d9dde2" stroke="#444" stroke-width="1.1"/><line x1="${x-r*.55}" y1="${y}" x2="${x+r*.55}" y2="${y}" stroke="#444" stroke-width="1"/>`;
+  const fer=(x,y,n)=>{const w=8+String(n).length*6;return `<g class="fer"><rect x="${x-w/2}" y="${y-5}" width="${w}" height="10" rx="2"/><text x="${x}" y="${y+3}" text-anchor="middle">${n}</text></g>`};
+  const box=(x,y,w,h,f='#fff')=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="${f}" stroke="#3d4852" stroke-width="1.4"/>`;
+  const duct=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#cdd3d9" stroke="#8a949e" stroke-dasharray="4 3"/>`;
+  let s='';
+  // enclosure
+  s+=`<rect x="30" y="40" width="560" height="700" rx="10" fill="#dfe4e9" stroke="#4a5560" stroke-width="2"/><rect x="44" y="54" width="532" height="672" rx="6" fill="#eef1f4" stroke="#a3acb5"/>`;
+  // incoming
+  s+=`<rect x="208" y="34" width="124" height="12" rx="2" fill="#555"/>`+T(342,26,'INCOMING 440 V 3φ from MCC busbar','pl','start');
+  s+=pw('230,0 230,103',C.L1)+pw('270,0 270,103',C.L2)+pw('310,0 310,103',C.L3);
+  // ducts
+  s+=duct(150,215,40,345)+duct(450,95,40,465)+duct(150,530,340,30)+T(170,300,'DUCT','pls')+T(470,200,'DUCT','pls')+T(320,549,'WIRE DUCT','pls');
+  // Q1
+  s+=box(205,95,130,90)+sc(230,103)+sc(270,103)+sc(310,103)+sc(230,177)+sc(270,177)+sc(310,177);
+  s+=T(230,121,'1','pls')+T(270,121,'3','pls')+T(310,121,'5','pls')+T(230,166,'2','pls')+T(270,166,'4','pls')+T(310,166,'6','pls');
+  s+=T(250,145,'Q1 MCCB','pt')+`<rect x="294" y="132" width="16" height="20" rx="2" fill="#222"/>`+T(270,159,'','pls');
+  // Q1 -> KM1
+  s+=pw('230,177 230,258',C.L1)+pw('270,177 270,258',C.L2)+pw('310,177 310,258',C.L3);
+  // taps to F3/F4
+  s+=pw('235,181 235,196 75,196 75,220',C.L1,2)+pw('275,181 275,206 115,206 115,220',C.L2,2);
+  s+=fer(160,190,'L1.1')+fer(205,215,'L2.1');
+  // F3 F4
+  s+=box(63,215,24,45)+box(103,215,24,45)+sc(75,221,3.5)+sc(115,221,3.5)+sc(75,254,3.5)+sc(115,254,3.5)+T(75,241,'F3','pl')+T(115,241,'F4','pl');
+  s+=pw('75,254 75,298',C.L1,2)+pw('115,254 115,298',C.L2,2);
+  // T1
+  s+=box(55,290,80,80,'#f7f3e8')+sc(75,298,3.5)+sc(115,298,3.5)+sc(75,362,3.5)+sc(115,362,3.5);
+  s+=T(95,324,'T1','pt')+T(95,337,'440/110 V','pls')+T(95,349,'control','pls');
+  s+=cw('75,362 75,405')+fer(90,384,'1')+cw('115,362 115,372 150,372')+fer(133,372,'0');
+  // F5
+  s+=box(63,400,24,45)+sc(75,406,3.5)+sc(75,439,3.5)+T(75,426,'F5','pl');
+  s+=cw('75,439 75,452 150,452')+fer(112,452,'2');
+  // KM1
+  s+=box(205,250,150,120)+sc(230,258)+sc(270,258)+sc(310,258)+sc(230,362)+sc(270,362)+sc(310,362);
+  s+=T(230,276,'1/L1','pls')+T(270,276,'3/L2','pls')+T(310,276,'5/L3','pls')+T(230,350,'2/T1','pls')+T(270,350,'4/T2','pls')+T(310,350,'6/T3','pls');
+  s+=T(270,306,'KM1','pt')+T(270,320,'contactor AC-3','pls')+T(270,332,'coil 110 V AC','pls');
+  // aux block KM1
+  s+=box(362,250,80,120,'#f5f6f7')+T(402,246,'aux / coil','pls');
+  [['A1',6],['A2',0],['13',5],['14',6],['23',2],['24',7],['31',2],['32',8],['43',21],['44',22]].forEach((r,i)=>{const yy=260+i*11.4;s+=sc(370,yy,3.2)+T(386,yy+3,r[0],'pls')+fer(414,yy,r[1])+cw(`${424},${yy} 450,${yy}`)});
+  // KM1 -> F2
+  s+=pw('230,362 230,388',C.L1)+pw('270,362 270,388',C.L2)+pw('310,362 310,388',C.L3);
+  // F2
+  s+=box(205,380,150,70)+sc(230,442)+sc(270,442)+sc(310,442)+T(255,410,'F2 O/L relay','pt')+T(255,424,'dial = motor FLC','pls')+`<circle cx="338" cy="398" r="6" fill="#2f6fd6"/>`+T(338,415,'reset','pls');
+  s+=T(230,436,'2/T1','pls')+T(270,436,'4/T2','pls')+T(310,436,'6/T3','pls');
+  s+=box(362,380,80,70,'#f5f6f7');
+  [['95',2],['96',3],['97',2],['98',9]].forEach((r,i)=>{const yy=393+i*14;s+=sc(370,yy,3.2)+T(386,yy+3,r[0],'pls')+fer(414,yy,r[1])+cw(`${424},${yy} 450,${yy}`)});
+  // power to X1
+  s+=pw('230,442 230,470 84,470 84,598',C.L1)+pw('270,442 270,482 114,482 114,598',C.L2)+pw('310,442 310,494 144,494 144,598',C.L3);
+  // CT
+  s+=`<circle cx="270" cy="458" r="9" fill="none" stroke="#2f6fd6" stroke-width="3"/>`+T(250,461,'CT','pl','end');
+  s+=`<polyline points="279,456 300,456 300,462 450,462" fill="none" stroke="#2f6fd6" stroke-width="1.4"/>`+fer(400,462,'S1/S2');
+  // X1 terminal strip
+  const X1=['U1','V1','W1','PE','3','4','5','6','7','8','9','0','21','22'];
+  s+=`<rect x="60" y="616" width="450" height="8" fill="#b9c0c7"/>`+T(54,624,'X1','pt','end');
+  X1.forEach((n,i)=>{const x=70+i*30,cx=x+13.5;const pe=n==='PE';
+    s+=`<rect x="${x}" y="595" width="27" height="50" rx="2" fill="${pe?'#e7f3dc':(i<3?'#e9e2d0':'#e6edf3')}" stroke="#555"/>`;
+    if(pe)s+=`<rect x="${x}" y="617" width="27" height="6" fill="#3a9d4a"/><rect x="${x+8}" y="617" width="6" height="6" fill="#f2d21b"/>`;
+    s+=sc(cx,603,3.5)+sc(cx,637,3.5)+T(cx,614,n,'pl');
+    if(i>=4)s+=cw(`${cx},560 ${cx},599`);
+  });
+  // field cables
+  s+=pw('84,641 84,700 128,735',C.L1,3)+pw('114,641 114,700 130,735',C.L2,3)+pw('144,641 144,700 132,735',C.L3,3)+pw('174,641 174,700 134,735',C.PE,3);
+  s+=`<rect x="110" y="735" width="44" height="10" rx="2" fill="#555"/>`+T(104,760,'M1 motor','pl','end')+T(104,773,'cable 3C+E','pls','end');
+  s+=`<polyline points="128,745 128,790" fill="none" stroke="#333" stroke-width="5"/>`;
+  s+=cw('204,641 204,700 217,735')+cw('234,641 234,700 221,735')+`<rect x="205" y="735" width="28" height="10" rx="2" fill="#555"/>`;
+  s+=`<polyline points="219,745 219,786 760,786 760,770" fill="none" stroke="#333" stroke-width="3"/>`+T(300,780,'2C cable, wires 3 & 4 (loop)','pls','start');
+  s+=cw('444,641 444,700 457,735')+cw('474,641 474,700 461,735')+`<rect x="445" y="735" width="28" height="10" rx="2" fill="#555"/>`+T(480,762,'→ AMS 21/22','pls','start');
+  // door harness
+  [234,264,294,324,354,384,414].forEach(cx=>{s+=cw(`${cx+3},641 ${cx+3},680`)});
+  s+=`<polyline points="237,680 605,680 605,470 628,470" fill="none" stroke="#c0392b" stroke-width="5" stroke-linejoin="round" opacity=".8"/>`;
+  s+=T(250,697,'door harness 4·5·6·7·8·9·0 + CT (flexible loop at hinge)','pls','start');
+  // door bond
+  s+=`<polyline points="590,612 620,612" fill="none" stroke="#3a9d4a" stroke-width="3"/>`+T(584,606,'door earth bond','pls','end');
+  // DOOR
+  s+=`<rect x="620" y="40" width="290" height="600" rx="10" fill="#d9dfe5" stroke="#4a5560" stroke-width="2"/>`;
+  s+=`<rect x="614" y="110" width="8" height="30" fill="#777"/><rect x="614" y="540" width="8" height="30" fill="#777"/>`;
+  s+=T(765,62,'DOOR — FRONT VIEW','pl');
+  s+=`<rect x="650" y="76" width="230" height="38" rx="3" fill="#fff" stroke="#555"/>`+T(765,92,'M1 · No.1 MAIN SW COOLING PUMP','pl')+T(765,106,'example nameplate','pls');
+  s+=`<rect x="705" y="128" width="120" height="92" rx="4" fill="#fbfbf8" stroke="#555"/><path d="M725,195 A40,40 0 0 1 805,195" fill="none" stroke="#333" stroke-width="1.5"/><line x1="765" y1="195" x2="790" y2="165" stroke="#c0392b" stroke-width="2"/>`+T(765,212,'A','pt')+T(765,236,'P1 ammeter (via CT)','pls');
+  [[680,'#39c46f','H1 RUNNING','7 / 0'],[765,'#fff7cf','H2 STOPPED','8 / 0'],[850,'#ffb400','H3 O/L TRIP','9 / 0']].forEach(l=>{
+    s+=`<circle cx="${l[0]}" cy="290" r="20" fill="${l[1]}" stroke="#333" stroke-width="2"/><circle cx="${l[0]}" cy="290" r="26" fill="none" stroke="#888" stroke-width="3"/>`+T(l[0],332,l[2],'pl')+T(l[0],346,'wires '+l[3],'pls');
+  });
+  s+=`<circle cx="720" cy="410" r="30" fill="none" stroke="#888" stroke-width="4"/><circle cx="720" cy="410" r="24" fill="#23894f"/>`+T(720,416,'I','pt').replace('class="pt"','class="pt" style="fill:#fff"');
+  s+=`<circle cx="815" cy="410" r="30" fill="none" stroke="#888" stroke-width="4"/><circle cx="815" cy="410" r="24" fill="#c62d22"/>`+T(815,416,'O','pt').replace('class="pt"','class="pt" style="fill:#fff"');
+  s+=T(720,458,'S2 START','pl')+T(720,471,'NO 13-14 · wires 5 / 6','pls')+T(815,458,'S1 STOP','pl')+T(815,471,'NC 11-12 · wires 4 / 5','pls');
+  s+=`<g stroke="#c0392b" stroke-width="1" stroke-dasharray="3 3" fill="none" opacity=".3"><polyline points="628,470 645,500 680,316"/><polyline points="645,500 765,316"/><polyline points="645,500 850,316"/><polyline points="645,500 720,440"/><polyline points="645,500 815,440"/><polyline points="645,500 765,222"/></g>`;
+  s+=T(765,520,'rear of door: devices wired via harness','pls')+T(765,600,'Locate lamps & buttons so the motor state','pls')+T(765,612,'is readable without opening the door','pls');
+  // remote E-stop
+  s+=`<rect x="640" y="690" width="250" height="80" rx="8" fill="#fff6d6" stroke="#b58b00" stroke-width="1.5"/><circle cx="675" cy="730" r="20" fill="#f2d21b" stroke="#333"/><circle cx="675" cy="730" r="13" fill="#d62d20" stroke="#7a130c"/>`;
+  s+=T(704,715,'S0 REMOTE EMERGENCY STOP','pl','start')+T(704,730,'outside ER / fire control station','pls','start')+T(704,743,'NC latching · loop 3 → 4','pls','start')+T(704,756,'open loop = motor stops (fail-safe)','pls','start');
+  return s;
+}
+
+/* ---------- Forward / Reverse ---------- */
+function frPower(){
+  let s='';const X=[70,110,150],N=['L1','L2','L3'];
+  X.forEach((x,i)=>{s+=T(x,20,N[i])+L(x,28,x,120,'fr-pin')+vKM(x,120,'fr-k1','fr-pin','fr-pout')+L(x,172,x,280,'fr-pout')+vOL(x,280,'fr-pout')+L(x,320,x,357,'fr-pout')+`<circle cx="${x}" cy="360" r="3.5" class="tm"/>`+T(x+6,352,['U1','V1','W1'][i],'term','start')});
+  s+=DOT(70,60,'fr-pin')+L(70,60,230,60,'fr-pin')+L(230,60,230,120,'fr-pin')+DOT(110,72,'fr-pin')+L(110,72,270,72,'fr-pin')+L(270,72,270,120,'fr-pin')+DOT(150,84,'fr-pin')+L(150,84,310,84,'fr-pin')+L(310,84,310,120,'fr-pin');
+  [230,270,310].forEach(x=>s+=vKM(x,120,'fr-k2','fr-pin','fr-pout'));
+  s+=`<polyline class="w fr-pout" points="230,172 230,215 150,215"/>`+DOT(150,215,'fr-pout')+`<polyline class="w fr-pout" points="270,172 270,230 110,230"/>`+DOT(110,230,'fr-pout')+`<polyline class="w fr-pout" points="310,172 310,245 70,245"/>`+DOT(70,245,'fr-pout');
+  s+=T(322,236,'L1 ↔ L3 swapped','term','start');
+  s+=L(40,149,144,149,'dash')+L(223,149,318,149,'dash')+L(144,149,223,149,'ilk')+`<polygon points="178,140 190,140 184,150" fill="#8a2be2"/>`+T(184,132,'mech. interlock','term');
+  s+=T(6,145,'KM1','tag','start')+T(6,158,'FWD','term','start')+T(326,145,'KM2','tag','start')+T(326,158,'REV','term','start');
+  s+=`<rect x="55" y="282" width="110" height="36" class="w dash"/>`+T(6,304,'F2','tag','start');
+  s+=L(70,363,88,380,'fr-pout')+L(110,363,110,370,'fr-pout')+L(150,363,132,380,'fr-pout')+`<circle cx="110" cy="402" r="32" fill="#fff" stroke="#17212b" stroke-width="1.8"/><circle id="fr-rotor" class="rotor" cx="110" cy="402" r="24"/>`+T(110,410,'M','motor');
+  s+=`<text id="fr-dir" x="155" y="420" class="tag">STOPPED</text>`;
+  return s;
+}
+function frCtrl(){
+  let s=L(70,60,70,220,'fr-n2')+L(760,60,760,220)+T(70,46,'2 · 110 V','tag','start')+T(760,46,'0','tag','end')+DOT(70,100,'fr-n2')+DOT(760,100)+DOT(760,220);
+  let y=100;
+  s+=L(70,y,100,y,'fr-n2')+NC(100,y,'F2','95','96','fr-f2','fr-n2','fr-n3')+L(140,y,180,y,'fr-n3')+WN(160,y,3)+PNC(180,y,'S0 E-STOP','11','12','fr-s0','fr-n3','fr-n4',true)+L(220,y,260,y,'fr-n4')+WN(240,y,4)+PNC(260,y,'S1 STOP','11','12','fr-s1','fr-n4','fr-n5')+L(300,y,360,y,'fr-n5')+WN(318,y,5);
+  s+=PNO(360,y,'S2 FWD','13','14','fr-s2','fr-n5','fr-a')+L(400,y,460,y,'fr-a')+WN(430,y,6)+PNC(460,y,'S3 REV','21','22','fr-s3nc','fr-a','fr-b')+L(500,y,520,y,'fr-b')+NC(520,y,'KM2','21','22','fr-km2nc','fr-b','fr-c')+L(560,y,600,y,'fr-c')+WN(580,y,8)+coil(600,y,'KM1','fr-km1c','fr-c','FORWARD')+L(640,y,760,y);
+  s+=L(330,y,330,270,'fr-n5')+DOT(330,y,'fr-n5')+L(330,150,360,150,'fr-n5')+NO(360,150,'KM1','13','14','fr-km1s','fr-n5','fr-a')+L(400,150,440,150,'fr-a')+L(440,150,440,y,'fr-a')+DOT(440,y,'fr-a');
+  y=220;
+  s+=DOT(330,150,'fr-n5')+DOT(330,y,'fr-n5')+L(330,y,360,y,'fr-n5')+PNO(360,y,'S3 REV','13','14','fr-s3','fr-n5','fr-d')+L(400,y,460,y,'fr-d')+WN(430,y,9)+PNC(460,y,'S2 FWD','21','22','fr-s2nc','fr-d','fr-e')+L(500,y,520,y,'fr-e')+NC(520,y,'KM1','21','22','fr-km1nc','fr-e','fr-f')+L(560,y,600,y,'fr-f')+WN(580,y,11)+coil(600,y,'KM2','fr-km2c','fr-f','REVERSE')+L(640,y,760,y);
+  s+=L(330,270,360,270,'fr-n5')+NO(360,270,'KM2','13','14','fr-km2s','fr-n5','fr-d')+L(400,270,440,270,'fr-d')+L(440,270,440,y,'fr-d')+DOT(440,y,'fr-d');
+  s+=T(470,302,'KM2 21-22 / KM1 21-22 = electrical interlock · S2/S3 NC = pushbutton interlock','fn','start');
+  return s;
+}
+
+/* ---------- Star-Delta ---------- */
+function ydPower(){
+  let s='';const X=[70,110,150],N=['L1','L2','L3'];
+  X.forEach((x,i)=>{s+=T(x,20,N[i])+L(x,28,x,100,'yd-pin')+vKM(x,100,'yd-k1','yd-pin','yd-pm')+L(x,152,x,170,'yd-pm')+vOL(x,170,'yd-pm')+L(x,210,x,267,'yd-pm')+`<circle cx="${x}" cy="270" r="3.5" class="tm"/>`+T(x+6,288,['U1','V1','W1'][i],'term','start')});
+  s+=DOT(70,50,'yd-pin')+L(70,50,270,50,'yd-pin')+L(270,50,270,100,'yd-pin')+DOT(110,62,'yd-pin')+L(110,62,310,62,'yd-pin')+L(310,62,310,100,'yd-pin')+DOT(150,74,'yd-pin')+L(150,74,350,74,'yd-pin')+L(350,74,350,100,'yd-pin');
+  [270,310,350].forEach(x=>s+=vKM(x,100,'yd-k3','yd-pin','yd-p2'));
+  s+=`<rect x="45" y="252" width="130" height="170" rx="6" fill="none" stroke="#6b7785" stroke-width="1.4"/>`+T(184,262,'motor terminal box','term','start');
+  [[70,'W2'],[110,'U2'],[150,'V2']].forEach(t=>{s+=`<circle cx="${t[0]}" cy="400" r="3.5" class="tm"/>`+T(t[0]+6,394,t[1],'term','start')});
+  s+=L(70,274,110,396,'wnd yd-pm')+L(110,274,150,396,'wnd yd-pm')+L(150,274,70,396,'wnd yd-pm')+T(110,335,'windings','term');
+  s+=`<polyline class="w yd-p2" points="270,152 270,445 70,445 70,404"/><polyline class="w yd-p2" points="310,152 310,458 110,458 110,404"/><polyline class="w yd-p2" points="350,152 350,471 150,471 150,404"/>`;
+  s+=L(270,445,410,445,'yd-p2')+L(310,458,440,458,'yd-p2')+L(350,471,470,471,'yd-p2')+DOT(270,445,'yd-p2')+DOT(310,458,'yd-p2')+DOT(350,471,'yd-p2');
+  [410,440,470].forEach(x=>s+=vKM(x,300,'yd-k2','yd-ps','yd-p2'));
+  s+=L(410,300,470,300,'yd-ps')+DOT(440,300,'yd-ps')+T(440,290,'star point','term');
+  s+=L(410,352,410,445,'yd-p2')+L(440,352,440,458,'yd-p2')+L(470,352,470,471,'yd-p2');
+  s+=L(40,129,144,129,'dash')+T(6,124,'KM1','tag','start')+T(6,137,'MAIN','term','start');
+  s+=`<rect x="55" y="172" width="110" height="36" class="w dash"/>`+T(6,194,'F2','tag','start')+T(6,207,'×0.58','term','start');
+  s+=L(263,129,358,129,'dash')+T(364,124,'KM3','tag','start')+T(364,137,'Δ DELTA','term','start');
+  s+=L(403,329,486,329,'dash')+T(490,324,'KM2','tag','start')+T(490,337,'Y STAR','term','start');
+  s+=`<circle cx="215" cy="340" r="26" fill="#fff" stroke="#17212b" stroke-width="1.8"/><circle id="yd-rotor" class="rotor" cx="215" cy="340" r="18"/>`+T(215,348,'M','motor')+`<text id="yd-mode" x="215" y="388" class="tag" text-anchor="middle">STOPPED</text>`;
+  return s;
+}
+function ydCtrl(){
+  let s=L(70,60,70,100,'yd-n2')+L(760,60,760,350)+T(70,46,'2 · 110 V','tag','start')+T(760,46,'0','tag','end')+DOT(70,100,'yd-n2');
+  let y=100;
+  s+=L(70,y,100,y,'yd-n2')+NC(100,y,'F2','95','96','yd-f2','yd-n2','yd-n3')+L(140,y,180,y,'yd-n3')+WN(160,y,3)+PNC(180,y,'S0 E-STOP','11','12','yd-s0','yd-n3','yd-n4',true)+L(220,y,260,y,'yd-n4')+WN(240,y,4)+PNC(260,y,'S1 STOP','11','12','yd-s1','yd-n4','yd-n5')+L(300,y,360,y,'yd-n5')+WN(318,y,5);
+  s+=PNO(360,y,'S2 START','13','14','yd-s2','yd-n5','yd-n6')+L(400,y,600,y,'yd-n6')+WN(520,y,6)+coil(600,y,'KM1','yd-km1c','yd-n6','MAIN')+L(640,y,760,y)+DOT(760,y);
+  s+=L(330,y,330,150,'yd-n5')+DOT(330,y,'yd-n5')+L(330,150,360,150,'yd-n5')+NO(360,150,'KM1','13','14','yd-km1s','yd-n5','yd-n6')+L(400,150,440,150,'yd-n6')+L(440,150,440,y,'yd-n6')+DOT(440,y,'yd-n6');
+  s+=L(460,y,460,350,'yd-n6')+DOT(460,y,'yd-n6');
+  y=210; s+=DOT(460,y,'yd-n6')+L(460,y,600,y,'yd-n6')+coil(600,y,'KT','yd-ktc','yd-n6','TIMER (on-delay)')+`<text id="yd-ktt" x="652" y="228" class="term"></text>`+L(640,y,760,y)+DOT(760,y);
+  y=280; s+=DOT(460,y,'yd-n6')+L(460,y,470,y,'yd-n6')+NC(470,y,'KT','55','56','yd-kt55','yd-n6','yd-a')+L(510,y,520,y,'yd-a')+NC(520,y,'KM3','21','22','yd-km3nc','yd-a','yd-b')+L(560,y,600,y,'yd-b')+coil(600,y,'KM2','yd-km2c','yd-b','STAR (Y)')+L(640,y,760,y)+DOT(760,y);
+  y=350; s+=L(460,y,470,y,'yd-n6')+NO(470,y,'KT','67','68','yd-kt67','yd-n6','yd-c')+L(510,y,520,y,'yd-c')+NC(520,y,'KM2','21','22','yd-km2nc','yd-c','yd-d')+L(560,y,600,y,'yd-d')+coil(600,y,'KM3','yd-km3c','yd-d','DELTA (Δ)')+L(640,y,760,y);
+  s+=T(80,240,'Start: KM1 + KM2 (star) close.','fn','start')+T(80,258,'After KT time: 55-56 opens → KM2 out,','fn','start')+T(80,276,'67-68 closes → KM3 in (delta).','fn','start')+T(80,294,'KM2 / KM3 NC contacts = interlock.','fn','start');
+  return s;
+}
+
+/* ---------- Duty / Standby ---------- */
+function dsMimic(){
+  let s=`<path d="M40,340 H420" class="pipe" id="ds-suc"/>`+T(230,368,'suction from sea chest / tank','term');
+  [[140,1],[320,2]].forEach(([x,n])=>{
+    s+=`<path d="M${x},340 V284" class="pipe" id="ds-s${n}"/><path d="M${x},216 V120" class="pipe" id="ds-d${n}"/>`;
+    s+=`<polygon points="${x-9},184 ${x+9},184 ${x},170" fill="#fff" stroke="#17212b" stroke-width="1.4"/>`;
+    s+=`<circle cx="${x}" cy="250" r="34" fill="#fff" stroke="#17212b" stroke-width="1.8"/><circle id="ds-r${n}" class="rotor" cx="${x}" cy="250" r="24"/>`+T(x,256,'P'+n,'tag');
+  });
+  s+=T(96,246,'No.1','tag','end')+T(96,260,'DUTY','term','end')+T(364,246,'No.2','tag','start')+T(364,260,'STANDBY','term','start');
+  s+=T(152,176,'NRV','term','start');
+  s+=`<path d="M60,120 H420" class="pipe" id="ds-hdr"/>`+T(420,142,'to M/E coolers →','term','end');
+  s+=L(230,94,230,116)+`<circle cx="230" cy="64" r="30" fill="#fff" stroke="#17212b" stroke-width="1.8"/><path d="M211,82 A26,26 0 1 1 249,82" fill="none" stroke="#c3ccd5" stroke-width="3"/><line id="ds-needle" x1="230" y1="64" x2="230" y2="42" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/><circle cx="230" cy="64" r="3" fill="#17212b"/>`;
+  s+=`<text id="ds-pv" x="230" y="88" class="term" text-anchor="middle">4.2 bar</text>`+T(186,40,'PI','tag','end');
+  s+=L(330,82,330,116)+`<rect id="ds-psbox" x="290" y="42" width="130" height="40" rx="4" fill="#fff" stroke="#17212b"/>`+T(355,58,'PS low-pressure','tag')+T(355,73,'switch · set 2.5 bar','term');
+  return s;
+}
+function dsCtrl(){
+  let s=L(70,60,70,580,'ds-n2')+L(760,60,760,580)+T(70,46,'2 · 110 V','tag','start')+T(760,46,'0','tag','end');
+  [100,230,410,480,530,580].forEach(y=>{s+=DOT(70,y,'ds-n2')+DOT(760,y)});
+  let y=100;
+  s+=L(70,y,100,y,'ds-n2')+NC(100,y,'F2.1','95','96','ds-f1','ds-n2','ds-a1')+L(140,y,180,y,'ds-a1')+PNC(180,y,'S1.1 STOP','11','12','ds-st1','ds-a1','ds-a2')+L(220,y,280,y,'ds-a2')+PNO(280,y,'S2.1 START','13','14','ds-sa1','ds-a2','ds-a3')+L(320,y,600,y,'ds-a3')+coil(600,y,'KM1','ds-km1c','ds-a3','No.1 PUMP (duty)')+L(640,y,760,y);
+  s+=L(250,y,250,150,'ds-a2')+DOT(250,y,'ds-a2')+L(250,150,280,150,'ds-a2')+NO(280,150,'KM1','13','14','ds-km1s','ds-a2','ds-a3')+L(320,150,360,150,'ds-a3')+L(360,150,360,y,'ds-a3')+DOT(360,y,'ds-a3');
+  y=230;
+  s+=L(70,y,100,y,'ds-n2')+NC(100,y,'F2.2','95','96','ds-f2','ds-n2','ds-b1')+L(140,y,180,y,'ds-b1')+PNC(180,y,'S1.2 STOP','11','12','ds-st2','ds-b1','ds-b2')+L(220,y,280,y,'ds-b2')+PNO(280,y,'S2.2 START','13','14','ds-sa2','ds-b2','ds-b3')+L(320,y,600,y,'ds-b3')+coil(600,y,'KM2','ds-km2c','ds-b3','No.2 PUMP (standby)')+L(640,y,760,y);
+  s+=L(250,y,250,330,'ds-b2')+DOT(250,y,'ds-b2')+L(250,280,280,280,'ds-b2')+DOT(250,280,'ds-b2')+NO(280,280,'KM2','13','14','ds-km2s','ds-b2','ds-b3')+L(320,280,360,280,'ds-b3')+L(250,330,280,330,'ds-b2')+NO(280,330,'KT','67','68','ds-kt','ds-b2','ds-b3')+L(320,330,360,330,'ds-b3')+L(360,330,360,y,'ds-b3')+DOT(360,y,'ds-b3')+DOT(360,280,'ds-b3');
+  s+=T(380,334,'← automatic start command from KT','fn','start');
+  y=410;
+  s+=L(70,y,100,y,'ds-n2')+NO(100,y,'SA AUTO','13','14','ds-sa','ds-n2','ds-c1')+L(140,y,180,y,'ds-c1')+NO(180,y,'PS low','1','2','ds-ps1','ds-c1','ds-c2')+L(220,y,600,y,'ds-c2')+coil(600,y,'KT','ds-ktc','ds-c2','start delay 3 s')+`<text id="ds-ktt" x="652" y="428" class="term"></text>`+L(640,y,760,y);
+  s+=T(180,446,'PS contact closes when pressure < 2.5 bar','term','start');
+  y=480; s+=L(70,y,100,y,'ds-n2')+NO(100,y,'PS low','3','4','ds-ps2','ds-n2','ds-d')+L(140,y,600,y,'ds-d')+lamp(600,y,'H4','LOW PRESS ALARM','a','ds-h4','ds-d')+L(640,y,760,y);
+  y=530; s+=L(70,y,100,y,'ds-n2')+NO(100,y,'KM1','23','24','ds-k1l','ds-n2','ds-e')+L(140,y,600,y,'ds-e')+lamp(600,y,'H1','No.1 RUNNING','g','ds-h1','ds-e')+L(640,y,760,y);
+  y=580; s+=L(70,y,100,y,'ds-n2')+NO(100,y,'KM2','23','24','ds-k2l','ds-n2','ds-f')+L(140,y,600,y,'ds-f')+lamp(600,y,'H2','No.2 RUNNING','g','ds-h2','ds-f')+L(640,y,760,y);
+  return s;
+}
+
+document.getElementById('svgPower').innerHTML=powerSVG();
+document.getElementById('svgLadder').innerHTML=ladderSVG();
+document.getElementById('svgPanel').innerHTML=panelSVG();
+document.getElementById('svgFRp').innerHTML=frPower();
+document.getElementById('svgFRc').innerHTML=frCtrl();
+document.getElementById('svgYDp').innerHTML=ydPower();
+document.getElementById('svgYDc').innerHTML=ydCtrl();
+document.getElementById('svgDSm').innerHTML=dsMimic();
+document.getElementById('svgDSc').innerHTML=dsCtrl();
+
+/* ---------- simulation helpers ---------- */
+const $=id=>document.getElementById(id);
+const lv=(c,v)=>document.querySelectorAll('.'+c).forEach(e=>e.classList.toggle('live',!!v));
+const C=(id,c,v)=>{const e=$(id);if(e)e.classList.toggle(c,!!v)};
+const G=(c,k,v)=>document.querySelectorAll('.'+c).forEach(e=>e.classList.toggle(k,!!v));
+function rot(id,a,run){const e=$(id);if(!e)return;e.setAttribute('transform',`rotate(${a} ${e.getAttribute('cx')} ${e.getAttribute('cy')})`);e.classList.toggle('run',run)}
+const chip=(t,c='')=>`<span class="chip ${c}">${t}</span>`;
+const meter=I=>chip('I ≈ '+I.toFixed(1)+' × FLC',I>4?'bad':I>1.6?'warn':I>0?'ok':'')+`<span class="bar"><i style="width:${Math.min(100,I/8*100)}%"></i></span>`;
+function hold(id,o,k,cb){
+  const b=$(id);
+  const on=e=>{e.preventDefault();if(o[k])return;o[k]=true;cb(k,true)};
+  const off=()=>{if(!o[k])return;o[k]=false;cb(k,false)};
+  b.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,off));
+  b.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();if(!e.repeat)on(e)}});
+  b.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')off()});
+}
+function tog(id,o,k,cb){$(id).addEventListener('click',()=>{o[k]=!o[k];cb(k)})}
+function togTxt(id,on,a,b){const e=$(id);e.classList.toggle('on',on);e.textContent=on?b:a}
+
+/* ---------- DOL sim ---------- */
+const D={power:true,ol:false,es:false,stop:false,start:false,km:false,s:0,a:0};
+function dolUpd(){
+  const n2=D.power,n3=n2&&!D.ol,n4=n3&&!D.es,n5=n4&&!D.stop;
+  D.km=n5&&(D.start||D.km);
+  lv('n2',n2);lv('n3',n3);lv('n4',n4);lv('n5',n5);lv('n6',D.km);
+  lv('n7',n2&&D.km);lv('n8',n2&&!D.km);lv('n9',n2&&D.ol);
+  lv('pin',D.power);lv('pout',D.power&&D.km);
+  C('f2nc','closed',!D.ol);C('f2no','closed',D.ol);
+  ['km13','km23','km43'].forEach(i=>C(i,'closed',D.km));C('km31','closed',!D.km);
+  G('kmmain','closed',D.km);
+  C('s2','pressed',D.start);C('s1','pressed',D.stop);C('s0','pressed',D.es);
+  C('km1coil','on',D.km);C('h1','on',n2&&D.km);C('h2','on',n2&&!D.km);C('h3','on',n2&&D.ol);
+  togTxt('bEs',D.es,'⏻ Remote E-STOP','⏻ E-STOP latched: click to reset');
+  togTxt('bOl',D.ol,'⚠ Simulate overload trip','↺ Reset F2 overload');
+  togTxt('bPw',!D.power,'⚡ Blackout (cut supply)','⚡ Restore supply');
+}
+function dolTick(){
+  const run=D.power&&D.km;
+  D.s=Math.max(0,Math.min(1,D.s+(run?0.045:-0.025)));
+  const I=run?(D.s<0.85?6.5-1.2*D.s:1):0;
+  D.a+=D.s*45;rot('rotor',D.a,run);
+  $('chips').innerHTML=chip('SUPPLY '+(D.power?'ON':'LOST'),D.power?'ok':'bad')+chip('KM1 '+(D.km?'ENERGISED':'OFF'),D.km?'ok':'')+chip('SPEED '+Math.round(D.s*100)+'%',D.s>0.05?'ok':'')+meter(I)+(D.ol?chip('F2 TRIPPED','warn'):'')+(D.es?chip('E-STOP LATCHED','bad'):'');
+}
+const say=(id,t)=>$(id).textContent=t;
+function dolAct(k,down){
+  const was=D.km;dolUpd();const m=t=>say('msg',t);
+  if(k==='start'&&down){
+    if(!D.power)m('No control supply: nothing happens. The contactor needs 110 V to pull in.');
+    else if(D.ol)m('F2 95-96 is open (tripped), so there is no voltage on wire 3. Reset the overload first.');
+    else if(D.es)m('Remote E-stop loop 3–4 is open. Reset the E-stop first.');
+    else if(D.stop)m('STOP is held, so wire 5 is dead. START cannot work.');
+    else if(!was)m('START: wire 5 → 6 made. KM1 coil energised, main contacts close. Inrush is about 6–7 × FLC until the motor is up to speed (watch the meter). 13-14 closes across START.');
+  }
+  if(k==='start'&&!down&&D.km)m('START released: KM1 holds in through its own 13-14 seal-in contact (5 → 6). H1 green on, H2 off, AMS gets “running” via 43-44.');
+  if(k==='stop'&&down)m(was?'STOP: link 4 → 5 opened. KM1 coil de-energised, 13-14 opens. Motor coasts to stop; H2 on.':'STOP pressed: the motor was already stopped.');
+  if(k==='stop'&&!down)m('STOP released: still stopped. The seal-in is open, so a new START command is needed.');
+  if(k==='es')m(D.es?'Remote E-stop: loop 3 → 4 opened, KM1 drops out. Stays latched until reset at the station.':'E-stop reset. The motor does NOT restart by itself. Press START.');
+  if(k==='ol')m(D.ol?'Overload: F2 bimetal tripped. 95-96 opens (KM1 drops out), 97-98 closes (H3 amber). Find the cause before resetting!':'F2 reset. Press START to run.');
+  if(k==='pw')m(D.power?'Supply restored. Motor stays stopped (no-volt release). Essential pumps are restarted by the sequential-restart system.':'BLACKOUT: no 110 V, so the coil cannot hold and KM1 drops out. All lamps off.');
+}
+hold('bStart',D,'start',dolAct);hold('bStop',D,'stop',dolAct);
+tog('bEs',D,'es',dolAct);tog('bOl',D,'ol',dolAct);tog('bPw',D,'power',dolAct);
+
+/* ---------- Fwd/Rev sim ---------- */
+const F={power:true,ol:false,es:false,stop:false,fwd:false,rev:false,k1:false,k2:false,v:0,a:0};
+function frUpd(){
+  const n2=F.power,n3=n2&&!F.ol,n4=n3&&!F.es,n5=n4&&!F.stop;
+  F.k1=n5&&(F.fwd||F.k1)&&!F.rev&&!F.k2;
+  F.k2=n5&&(F.rev||F.k2)&&!F.fwd&&!F.k1;
+  const A=n5&&(F.fwd||F.k1),B=A&&!F.rev,Cc=B&&!F.k2,Dd=n5&&(F.rev||F.k2),E=Dd&&!F.fwd,Ff=E&&!F.k1;
+  lv('fr-n2',n2);lv('fr-n3',n3);lv('fr-n4',n4);lv('fr-n5',n5);lv('fr-a',A);lv('fr-b',B);lv('fr-c',Cc);lv('fr-d',Dd);lv('fr-e',E);lv('fr-f',Ff);
+  lv('fr-pin',F.power);lv('fr-pout',F.power&&(F.k1||F.k2));
+  G('fr-k1','closed',F.k1);G('fr-k2','closed',F.k2);
+  C('fr-f2','closed',!F.ol);C('fr-km1s','closed',F.k1);C('fr-km2s','closed',F.k2);C('fr-km2nc','closed',!F.k2);C('fr-km1nc','closed',!F.k1);
+  C('fr-s0','pressed',F.es);C('fr-s1','pressed',F.stop);C('fr-s2','pressed',F.fwd);C('fr-s2nc','pressed',F.fwd);C('fr-s3','pressed',F.rev);C('fr-s3nc','pressed',F.rev);
+  C('fr-km1c','on',F.k1);C('fr-km2c','on',F.k2);
+  togTxt('frE',F.es,'⏻ E-STOP','⏻ E-STOP latched: reset');togTxt('frO',F.ol,'⚠ Overload trip','↺ Reset F2');togTxt('frP',!F.power,'⚡ Blackout','⚡ Restore supply');
+}
+function frTick(){
+  const tgt=F.power&&F.k1?1:F.power&&F.k2?-1:0;
+  F.v+=(tgt-F.v)*(tgt?0.06:0.035);
+  const I=tgt?1+5.5*Math.min(1,Math.abs(tgt-F.v)/0.9):0;
+  F.a+=F.v*45;rot('fr-rotor',F.a,!!tgt);
+  $('fr-dir').textContent=Math.abs(F.v)<0.03?'STOPPED':(F.v>0?'⟳ FORWARD':'⟲ REVERSE')+' '+Math.round(Math.abs(F.v)*100)+'%';
+  $('fr-chips').innerHTML=chip('KM1 FWD '+(F.k1?'ON':'OFF'),F.k1?'ok':'')+chip('KM2 REV '+(F.k2?'ON':'OFF'),F.k2?'ok':'')+meter(I)+(F.ol?chip('F2 TRIPPED','warn'):'')+(F.es?chip('E-STOP','bad'):'')+(!F.power?chip('NO SUPPLY','bad'):'');
+}
+function frAct(k,down){
+  const w1=F.k1,w2=F.k2;frUpd();const m=t=>say('fr-msg',t);
+  if(k==='fwd'&&down){
+    if(w2&&F.k1)m('REV was running: FWD’s NC contact (21-22) broke the REV rung, KM2 dropped, then KM1 closed. Direct reversal = plugging: huge current and mechanical shock. On winches and cranes, STOP first and let the brake hold.');
+    else if(F.k1&&!w1)m('FWD: KM1 closes and seals via 13-14. KM1 21-22 opens in the KM2 rung, so REV is electrically locked out while FWD runs.');
+    else if(!F.k1)m('KM1 cannot close: check supply, F2, E-stop and STOP (follow the red).');
+  }
+  if(k==='rev'&&down){
+    if(w1&&F.k2)m('FWD was running: REV’s NC contact (21-22) broke the FWD rung, KM1 dropped, then KM2 closed. Plugging: watch the current spike. In practice, STOP first.');
+    else if(F.k2&&!w2)m('REV: KM2 closes (L1 and L3 swapped) and seals via 13-14. KM2 21-22 opens in the KM1 rung, so FWD is locked out.');
+    else if(!F.k2)m('KM2 cannot close: check supply, F2, E-stop and STOP.');
+  }
+  if(k==='stop'&&down)m('STOP: both rungs dead, contactor drops out, motor coasts down.');
+  if(k==='es')m(F.es?'E-STOP latched: both directions dead.':'E-stop reset. Select a direction again.');
+  if(k==='ol')m(F.ol?'F2 tripped: 95-96 opens, so both directions are dead.':'F2 reset.');
+  if(k==='pw')m(F.power?'Supply restored. Nothing restarts automatically.':'Blackout: contactor drops out (no-volt release).');
+}
+hold('frF',F,'fwd',frAct);hold('frR',F,'rev',frAct);hold('frS',F,'stop',frAct);
+tog('frE',F,'es',frAct);tog('frO',F,'ol',frAct);tog('frP',F,'power',frAct);
+
+/* ---------- Star-Delta sim ---------- */
+const Y={power:true,ol:false,es:false,stop:false,start:false,k1:false,k2:false,k3:false,kt:0,timed:false,set:4,s:0,a:0,I:0};
+function ydUpd(){
+  const n2=Y.power,n3=n2&&!Y.ol,n4=n3&&!Y.es,n5=n4&&!Y.stop;
+  Y.k1=n5&&(Y.start||Y.k1);const n6=Y.k1;
+  if(!n6)Y.kt=0;
+  Y.timed=n6&&Y.kt>=Y.set;
+  const a=n6&&!Y.timed,b=a&&!Y.k3;Y.k2=b;
+  const c=n6&&Y.timed,d=c&&!Y.k2;Y.k3=d;
+  lv('yd-n2',n2);lv('yd-n3',n3);lv('yd-n4',n4);lv('yd-n5',n5);lv('yd-n6',n6);lv('yd-a',a);lv('yd-b',b);lv('yd-c',c);lv('yd-d',d);
+  lv('yd-pin',Y.power);lv('yd-pm',Y.power&&Y.k1);lv('yd-p2',Y.power&&Y.k1&&(Y.k2||Y.k3));lv('yd-ps',Y.power&&Y.k1&&Y.k2);
+  G('yd-k1','closed',Y.k1);G('yd-k2','closed',Y.k2);G('yd-k3','closed',Y.k3);
+  C('yd-f2','closed',!Y.ol);C('yd-km1s','closed',Y.k1);C('yd-kt55','closed',!Y.timed);C('yd-kt67','closed',Y.timed);C('yd-km3nc','closed',!Y.k3);C('yd-km2nc','closed',!Y.k2);
+  C('yd-s0','pressed',Y.es);C('yd-s1','pressed',Y.stop);C('yd-s2','pressed',Y.start);
+  C('yd-km1c','on',Y.k1);C('yd-ktc','on',n6);C('yd-km2c','on',Y.k2);C('yd-km3c','on',Y.k3);
+  $('yd-ktt').textContent=n6?(Y.timed?'timed out ✓':'t = '+Y.kt.toFixed(1)+' / '+Y.set+' s'):'';
+  $('yd-mode').textContent=Y.k2?'STAR':Y.k3?'DELTA':'STOPPED';
+  togTxt('ydE',Y.es,'⏻ E-STOP','⏻ E-STOP latched: reset');togTxt('ydO',Y.ol,'⚠ Overload trip','↺ Reset F2');togTxt('ydP',!Y.power,'⚡ Blackout','⚡ Restore supply');
+}
+function ydTick(){
+  if(Y.power&&Y.k1&&!Y.timed)Y.kt+=0.1;
+  const w3=Y.k3;ydUpd();
+  if(!w3&&Y.k3){const sp=Math.round(Y.s*100);say('yd-msg','KT timed out: 55-56 opened → KM2 (star) out; then 67-68 closed with KM2 21-22 → KM3 (delta) in. '+(Y.s<0.7?'Motor was only at '+sp+'% speed, so the delta changeover gives a big current peak (almost DOL). Set KT longer!':'Motor was at '+sp+'% speed, so the changeover peak is small. Good setting.'))}
+  const tgt=Y.power&&Y.k2?0.85:Y.power&&Y.k3?1:0;
+  Y.s+=(tgt-Y.s)*(tgt?0.05:0.03);
+  let I=0;
+  if(Y.power&&Y.k2)I=0.7+1.6*Math.max(0,(0.85-Y.s)/0.85);
+  if(Y.power&&Y.k3)I=Math.min(6.5,1+12*Math.max(0,1-Y.s));
+  Y.a+=Y.s*45;rot('yd-rotor',Y.a,tgt>0);
+  $('yd-chips').innerHTML=chip('MODE '+(Y.k2?'STAR (Y)':Y.k3?'DELTA (Δ)':'OFF'),Y.k1?'ok':'')+chip('SPEED '+Math.round(Y.s*100)+'%',Y.s>0.05?'ok':'')+meter(I)+chip('DOL would be ≈ 6–7 × FLC')+(Y.ol?chip('F2 TRIPPED','warn'):'')+(Y.es?chip('E-STOP','bad'):'')+(!Y.power?chip('NO SUPPLY','bad'):'');
+}
+function ydAct(k,down){
+  const was=Y.k1;ydUpd();const m=t=>say('yd-msg',t);
+  if(k==='start'&&down){
+    if(!Y.k1)m('Cannot start: check supply, F2, E-stop, STOP.');
+    else if(!was)m('START: KM1 (main) and KM2 (star) close together, KT starts timing. Each winding gets 254 V, so current and torque are about ⅓ of DOL.');
+  }
+  if(k==='start'&&!down&&Y.k1)m('START released: KM1 sealed by 13-14. Still in STAR while KT counts. Watch the speed rise.');
+  if(k==='stop'&&down)m('STOP: KM1, KM2/KM3 and KT all drop out. Timer resets.');
+  if(k==='es')m(Y.es?'E-STOP latched: everything drops out.':'E-stop reset. Press START.');
+  if(k==='ol')m(Y.ol?'F2 tripped (set at 0.58 × FLC because it measures winding current).':'F2 reset.');
+  if(k==='pw')m(Y.power?'Supply restored. No automatic restart.':'Blackout: all contactors drop out.');
+}
+hold('ydS2',Y,'start',ydAct);hold('ydS1',Y,'stop',ydAct);
+tog('ydE',Y,'es',ydAct);tog('ydO',Y,'ol',ydAct);tog('ydP',Y,'power',ydAct);
+$('ydT').addEventListener('input',e=>{Y.set=+e.target.value;$('ydTv').textContent=Y.set+' s'});
+
+/* ---------- Duty/Standby sim ---------- */
+const P={ol1:false,ol2:false,st1:false,sa1:false,st2:false,sa2:false,auto:true,k1:true,k2:false,p:4.2,low:false,kt:0,ktDone:false,s1:1,s2:0,a1:0,a2:0};
+function dsUpd(){
+  const a1=!P.ol1,a2=a1&&!P.st1;P.k1=a2&&(P.sa1||P.k1);
+  const c1=P.auto,c2=c1&&P.low;if(!c2)P.kt=0;P.ktDone=c2&&P.kt>=3;
+  const b1=!P.ol2,b2=b1&&!P.st2;P.k2=b2&&(P.sa2||P.k2||P.ktDone);
+  lv('ds-n2',true);lv('ds-a1',a1);lv('ds-a2',a2);lv('ds-a3',P.k1);lv('ds-b1',b1);lv('ds-b2',b2);lv('ds-b3',P.k2);lv('ds-c1',c1);lv('ds-c2',c2);lv('ds-d',P.low);lv('ds-e',P.k1);lv('ds-f',P.k2);
+  C('ds-f1','closed',!P.ol1);C('ds-f2','closed',!P.ol2);C('ds-km1s','closed',P.k1);C('ds-km2s','closed',P.k2);C('ds-kt','closed',P.ktDone);C('ds-sa','closed',P.auto);C('ds-ps1','closed',P.low);C('ds-ps2','closed',P.low);C('ds-k1l','closed',P.k1);C('ds-k2l','closed',P.k2);
+  C('ds-st1','pressed',P.st1);C('ds-sa1','pressed',P.sa1);C('ds-st2','pressed',P.st2);C('ds-sa2','pressed',P.sa2);
+  C('ds-km1c','on',P.k1);C('ds-km2c','on',P.k2);C('ds-ktc','on',c2);C('ds-h4','on',P.low);C('ds-h1','on',P.k1);C('ds-h2','on',P.k2);
+  $('ds-ktt').textContent=c2?(P.ktDone?'timed out ✓':'t = '+P.kt.toFixed(1)+' / 3 s'):'';
+  togTxt('dsO1',P.ol1,'⚠ Trip No.1','↺ Reset No.1 F2');togTxt('dsO2',P.ol2,'⚠ Trip No.2','↺ Reset No.2 F2');
+  $('dsAu').textContent=P.auto?'AUTO selected':'MANUAL selected';$('dsAu').classList.toggle('on',!P.auto);
+}
+function dsTick(){
+  P.s1+=((P.k1?1:0)-P.s1)*0.08;P.s2+=((P.k2?1:0)-P.s2)*0.08;
+  const tgt=4.2*Math.pow(Math.max(P.s1,P.s2),2);P.p+=(tgt-P.p)*0.12;
+  const wasLow=P.low;
+  if(P.p<2.5)P.low=true;else if(P.p>3.0)P.low=false;
+  if(P.auto&&P.low&&!P.ktDone)P.kt+=0.1;
+  const w2=P.k2;dsUpd();
+  if(!w2&&P.k2&&P.ktDone)say('ds-msg','KT timed out: 67-68 closed → KM2 started No.2 (standby), which seals in via 13-14. Pressure recovers, PS opens, KT resets, but No.2 keeps running. Acknowledge the alarm and investigate No.1.');
+  else if(!wasLow&&P.low&&P.auto&&!P.k2)say('ds-msg','Pressure below 2.5 bar: PS closes → H4 LOW PRESSURE alarm (also to AMS) and KT starts its 3 s delay…');
+  P.a1+=P.s1*40;P.a2+=P.s2*40;rot('ds-r1',P.a1,P.k1);rot('ds-r2',P.a2,P.k2);
+  C('ds-s1','flow',P.s1>0.2);C('ds-d1','flow',P.s1>0.2);C('ds-s2','flow',P.s2>0.2);C('ds-d2','flow',P.s2>0.2);
+  C('ds-suc','flow',Math.max(P.s1,P.s2)>0.2);C('ds-hdr','flow',P.p>1);
+  const ang=(-120+Math.min(P.p,6)/6*240)*Math.PI/180;
+  $('ds-needle').setAttribute('x2',230+22*Math.sin(ang));$('ds-needle').setAttribute('y2',64-22*Math.cos(ang));
+  $('ds-pv').textContent=P.p.toFixed(1)+' bar';$('ds-psbox').setAttribute('fill',P.low?'#ffe08a':'#fff');
+  $('ds-chips').innerHTML=chip('No.1 '+(P.k1?'RUNNING':P.ol1?'TRIPPED':'STOPPED'),P.k1?'ok':P.ol1?'bad':'')+chip('No.2 '+(P.k2?'RUNNING':P.ol2?'TRIPPED':'STOPPED'),P.k2?'ok':P.ol2?'bad':'')+chip('PRESSURE '+P.p.toFixed(1)+' bar',P.low?'warn':'ok')+chip(P.auto?'AUTO':'MANUAL',P.auto?'ok':'warn')+(P.low?chip('LOW PRESS ALARM','bad'):'');
+}
+function dsAct(k,down){
+  dsUpd();const m=t=>say('ds-msg',t);
+  if(k==='ol1')m(P.ol1?'No.1 tripped on overload → KM1 drops out → pump runs down, pressure falls…':'No.1 overload reset. Start it manually if you want it back as duty; then stop No.2.');
+  if(k==='ol2')m(P.ol2?'No.2 tripped: no standby available! In real life this is a serious alarm.':'No.2 overload reset.');
+  if(k==='st1'&&down)m(P.auto?'You are stopping No.1 with AUTO selected: pressure will drop and the standby will start after 3 s. To shut the system down, select MANUAL first.':'No.1 stopped (MANUAL, so no changeover).');
+  if(k==='st2'&&down)m(P.auto&&P.low?'Stopping No.2 while pressure is low: it will auto-start again after KT times out.':'No.2 stopped.');
+  if(k==='sa1'&&down)m('No.1 START: KM1 in and sealed. The KT delay stops a false changeover while pressure builds up.');
+  if(k==='sa2'&&down)m('No.2 START (manual): KM2 in and sealed.');
+  if(k==='auto')m(P.auto?'AUTO: changeover armed.':'MANUAL: auto changeover disabled. SA contact open, so KT can never energise.');
+}
+hold('dsA1',P,'sa1',dsAct);hold('dsB1',P,'st1',dsAct);hold('dsA2',P,'sa2',dsAct);hold('dsB2',P,'st2',dsAct);
+tog('dsO1',P,'ol1',dsAct);tog('dsO2',P,'ol2',dsAct);tog('dsAu',P,'auto',dsAct);
+
+dolUpd();frUpd();ydUpd();dsUpd();
+setInterval(()=>{dolTick();frTick();ydTick();dsTick()},100);
+
+/* ================= FULL-SCALE SIMULATOR ================= */
+const SQ3=Math.sqrt(3);
+const pct=v=>Math.round(v*100)+' %', f1=v=>(+v).toFixed(1);
+const CT_STD=[9,12,18,25,32,40,50,65,80,95,115,150,185,225,265,330,400,500,630,780,1000,1250];
+const pickCt=a=>CT_STD.find(v=>v>=a)||'>1250';
+const NAMES={dol:'DOL',rev:'Reversing DOL',yd:'Star-Delta',ss:'Soft starter',vfd:'VFD'};
+const OPTS={V:[220,380,400,415,440,460,480,690],f:[50,60],gen:[250,500,750,1000,1500,2500,4000],mot:['220/380','230/400','254/440','380/660','400/690','440/760'],mf:[50,60],kw:[1.5,3,5.5,7.5,11,15,22,30,37,45,55,75,90,110,132,160,200,250]};
+const FMT={V:v=>v+' V',f:v=>v+' Hz',gen:v=>v+' kVA',mot:v=>v.replace('/',' Δ / ')+' Y',mf:v=>v+' Hz',kw:v=>v+' kW'};
+const CFG={V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:37,load:'pump',lp:80,method:'dol',conn:'auto',cv:'110ac',olAuto:true,ol:0,kt:6,ssU0:40,ssT:8,vfdT:10,vfdSp:100,spd:1};
+const PRESETS={
+  a:{name:'Ship LO pump 37 kW · DOL · 440 V 60 Hz',V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:37,load:'pump',lp:80,method:'dol',cv:'110ac'},
+  b:{name:'SW cooling pump 75 kW · Star-Delta',V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:75,load:'pump',lp:85,method:'yd',cv:'110ac',kt:6},
+  c:{name:'European 230/400 V 50 Hz motor on 440 V 60 Hz ship',V:440,f:60,gen:1000,mot:'230/400',mf:50,kw:15,load:'pump',lp:85,method:'dol',cv:'110ac'},
+  d:{name:'✗ WRONG: 230/400 V motor in DELTA on 400 V',V:400,f:50,gen:1000,mot:'230/400',mf:50,kw:15,load:'pump',lp:70,method:'dol',conn:'D',cv:'230ac'},
+  e:{name:'✗ WRONG: 440 Δ motor left in STAR on 440 V',V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:37,load:'compressor',lp:90,method:'dol',conn:'Y',cv:'110ac'},
+  f:{name:'✗ Fire pump 160 kW DOL on one 500 kVA generator',V:440,f:60,gen:500,mot:'440/760',mf:60,kw:160,load:'pump',lp:90,method:'dol',cv:'110ac'},
+  g:{name:'✗ Star-Delta KT too short (1 s)',V:440,f:60,gen:750,mot:'440/760',mf:60,kw:90,load:'fan',lp:90,method:'yd',cv:'110ac',kt:1},
+  h:{name:'Mooring winch 30 kW · reversing DOL · 24 V DC',V:440,f:60,gen:1000,mot:'254/440',mf:60,kw:30,load:'winch',lp:70,method:'rev',cv:'24dc'},
+  i:{name:'Screw compressor 75 kW · soft starter',V:440,f:60,gen:750,mot:'440/760',mf:60,kw:75,load:'compressor',lp:60,method:'ss',cv:'230ac'},
+  j:{name:'ER supply fan 45 kW · VFD at 80 %',V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:45,load:'fan',lp:95,method:'vfd',cv:'24dc',vfdSp:80},
+  k:{name:'✗ F2 set too high + stalled compressor (burn-out)',V:440,f:60,gen:1000,mot:'440/760',mf:60,kw:22,load:'compressor',lp:125,method:'yd',cv:'110ac',olAuto:false,ol:60}
+};
+function effpf(kw){return kw<=4?[0.84,0.80]:kw<=15?[0.89,0.84]:kw<=55?[0.92,0.86]:kw<=160?[0.94,0.87]:[0.95,0.88]}
+function derive(){
+  const c=CFG,[Vd,Vy]=c.mot.split('/').map(Number),fr=c.f/c.mf,VdE=Vd*fr,VyE=Vy*fr;
+  const rD=c.V/VdE,rY=c.V/VyE,okD=Math.abs(rD-1)<=0.1,okY=Math.abs(rY-1)<=0.1;
+  const recConn=okD?'D':okY?'Y':(Math.abs(rD-1)<Math.abs(rY-1)?'D':'Y');
+  const conn=c.method==='yd'?'YD':(c.conn==='auto'?recConn:c.conn);
+  const runConn=conn==='YD'?'D':conn;
+  const [eta,pf]=effpf(c.kw);
+  const Iwr=c.kw*1000/(3*Vd*eta*pf);
+  const FLC=runConn==='D'?SQ3*Iwr:Iwr;
+  const olRec=c.method==='yd'?Iwr:FLC;
+  const olSet=c.olAuto||!c.ol?olRec:c.ol;
+  const k={dol:6.6,rev:6.6,yd:2.2,ss:6.6*c.ssU0/100,vfd:0.4}[c.method];
+  const Ist=k*FLC,Sst=SQ3*c.V*Ist/1000,dip=1-1/(1+0.15*Sst/c.gen);
+  return {Vd,Vy,VdE,VyE,okD,okY,recConn,conn,runConn,eta,pf,Iwr,FLC,olRec,olSet,Ist,Sst,dip};
+}
+function recommend(D){
+  const c=CFG;
+  if(!D.okD&&!D.okY)return{method:null,why:`This ${c.mot} V ${c.mf} Hz motor does not suit ${c.V} V ${c.f} Hz in star or delta. Order a motor rated for the ship’s supply.`};
+  const FL=D.okD?SQ3*D.Iwr:D.Iwr,dip=k=>1-1/(1+0.15*SQ3*c.V*k*FL/1000/c.gen);
+  const winch=c.load==='winch',heavy=(c.load==='compressor'||winch)&&c.lp>45;
+  let m,why;
+  if(dip(6.6)<=0.15){m=winch?'rev':'dol';why=`DOL start dips the generator only ${pct(dip(6.6))} (≤ 15 %). Simplest and most reliable${winch?'; reversing for the winch':''}.`}
+  else if(winch){m='vfd';why=`DOL dip ${pct(dip(6.6))} is too high and a winch needs full torque in both directions → VFD.`}
+  else if(D.okD&&!heavy&&dip(2.2)<=0.15){m='yd';why=`DOL dip ${pct(dip(6.6))} too high. The motor is Δ-rated at ${c.V} V and the load is light at start → Star-Delta (dip ≈ ${pct(dip(2.2))}).`}
+  else if(dip(2.8)<=0.15){m='ss';why=`DOL dip ${pct(dip(6.6))} too high${D.okD?'':', motor cannot do Y-Δ'}${heavy?', heavy start torque':''} → soft starter limits current (dip ≈ ${pct(dip(2.8))}).`}
+  else{m='vfd';why=`Even a soft starter dips ${pct(dip(2.8))} → VFD (start current ≈ FLC).`}
+  if((c.load==='fan'||c.load==='pump')&&m!=='vfd')why+=' Tip: if the flow demand varies, a VFD also saves a lot of energy.';
+  return{method:m,why};
+}
+function assess(D){
+  const c=CFG,r=[],add=(l,t)=>r.push([l,t]),cn=x=>x==='D'?'DELTA (Δ)':'STAR (Y)';
+  add('i',`Motor ${D.Vd} V Δ / ${D.Vy} V Y at ${c.mf} Hz${c.f!==c.mf?` → on ${c.f} Hz it suits ${Math.round(D.VdE)} V Δ / ${Math.round(D.VyE)} V Y (constant V/f)`:''}.`);
+  if(c.method==='yd'){
+    D.okD?add('ok',`Star-Delta OK: motor is Δ-rated for ${c.V} V. Star stage gives ${Math.round(c.V/SQ3)} V per winding.`)
+         :add('x',`Star-Delta NOT possible: in Δ each winding gets ${c.V} V but is rated ${Math.round(D.VdE)} V. Y-Δ needs a motor Δ-rated at the supply (e.g. 440/760 V for a 440 V ship).`);
+  }else{
+    const Vw=D.conn==='D'?c.V:c.V/SQ3,q=Vw/D.VdE;
+    if(q>1.1)add('x',`${cn(D.conn)} puts ${Math.round(Vw)} V on each winding, rated ${Math.round(D.VdE)} V (+${pct(q-1)}). Core saturates → huge current → breaker trip or burnt winding. Connect in ${cn(D.recConn)}.`);
+    else if(q<0.9)add('x',`${cn(D.conn)} gives only ${Math.round(Vw)} V per winding (rated ${Math.round(D.VdE)} V). Torque drops to ${Math.round(q*q*100)} % → slow start or stall, overheating. Connect in ${cn(D.recConn)}.`);
+    else add('ok',`${cn(D.conn)} is correct: ${Math.round(Vw)} V per winding (rated ${Math.round(D.VdE)} V). Terminal box links shown below.`);
+  }
+  if(c.f!==c.mf){
+    const k=c.f/c.mf;
+    if(k>1&&(c.load==='pump'||c.load==='fan'))add('w',`${c.mf} Hz motor on ${c.f} Hz runs ${pct(k-1)} faster. Pump/fan torque ×${(k*k).toFixed(2)}, power ×${(k**3).toFixed(2)} → likely OVERLOAD. Trim the impeller or fit a larger motor.`);
+    else add('w',`${c.mf} Hz motor on ${c.f} Hz: speed ×${k.toFixed(2)}. Check the load at the new speed.`);
+  }
+  add(D.dip<=0.15?'ok':D.dip<=0.2?'w':'x',`Start ≈ ${Math.round(D.Ist)} A (${(D.Ist/D.FLC).toFixed(1)} × FLC) → generator dip ≈ ${pct(D.dip)} on ${c.gen} kVA (typical class limit 15 %).`);
+  if(c.method==='yd'&&(c.load==='compressor'||c.load==='winch')&&c.lp>40)add('w','Star gives only ⅓ torque: a loaded compressor/winch may not accelerate in star. Unload at start or use soft starter/VFD.');
+  if(c.load==='winch'&&!['rev','vfd'].includes(c.method))add('w','A winch/crane needs both directions: use reversing DOL or a VFD.');
+  if(c.method==='ss'&&(c.load==='compressor'||c.load==='winch')&&c.lp>55)add('w',`Soft starter torque ∝ voltage²: at ${c.ssU0} % initial voltage only ≈ ${Math.round((c.ssU0/100)**2*132)} % starting torque. Raise initial voltage for heavy loads.`);
+  ({line:()=>add('x',`Control at ${c.V} V (no transformer): not recommended. Buttons and lamps at line voltage, no isolation from the IT system. Use 110/230 V AC via transformer or 24 V DC.`),
+    '110ac':()=>add('ok','Control 110 V AC via transformer T1: classic marine practice, isolated from the main system.'),
+    '230ac':()=>add('ok','Control 230 V AC via transformer T1 (isolated).'),
+    '24dc':()=>add('ok','Control 24 V DC via PSU G1: safest for personnel, PLC/AMS friendly. For essential services consider UPS backup.')})[c.cv]();
+  const F=D.FLC,sz={dol:`KM1 AC-3 ≥ ${pickCt(F)} A · F2 ${f1(D.olRec)} A · Q1 motor breaker ≥ ${Math.ceil(F)} A, magnetic ≈ 12–14 × to ride through inrush`,
+    rev:`KM1 + KM2 AC-3 ≥ ${pickCt(F)} A, mech. + electrical interlock · F2 ${f1(D.olRec)} A`,
+    yd:`KM1 & KM3 ≥ ${pickCt(0.58*F)} A, KM2 ≥ ${pickCt(0.34*F)} A · F2 = 0.58 × FLC = ${f1(D.olRec)} A · KT ≈ ${c.kt} s`,
+    ss:`Soft starter ≥ ${Math.ceil(F)} A${c.load==='compressor'?' heavy-duty':''} · KM1 AC-3 ≥ ${pickCt(F)} A · bypass ≥ ${pickCt(F)} A · F2 ${f1(D.olRec)} A`,
+    vfd:`VFD ≥ ${Math.ceil(F)} A ${c.load==='compressor'||c.load==='winch'?'heavy':'normal'}-duty · motor OL in drive = ${f1(F)} A · line contactor AC-1 ≥ ${pickCt(F)} A · shielded motor cable, harmonic filter`}[c.method];
+  add('i',`FLC ≈ ${f1(F)} A (η ${D.eta}, pf ${D.pf}). ${sz}.`);
+  if(!c.olAuto&&c.ol&&Math.abs(c.ol/D.olRec-1)>0.1)add('w',`F2 set ${f1(c.ol)} A, should be ${f1(D.olRec)} A. ${c.ol>D.olRec?'Too HIGH: the motor is NOT protected':'Too low: nuisance trips'}.`);
+  const rc=recommend(D);
+  add('rec',rc.method?`Recommended: <b>${NAMES[rc.method]}</b>${rc.method==='yd'?'':` with motor in <b>${D.recConn==='D'?'DELTA':'STAR'}</b>`}${rc.method===c.method&&(c.method==='yd'||D.conn===D.recConn)?' ✓ (current choice)':''}. ${rc.why}`:rc.why);
+  return r;
+}
+function renderAssess(){
+  const ic={ok:['✓','i-ok'],w:['⚠','i-w'],x:['✗','i-x'],i:['ℹ','i-i'],rec:['★','i-r']};
+  $('x-assess').innerHTML='<h4>Engineering check</h4>'+assess(D0).map(([l,t])=>`<div class="row"><span class="ic ${ic[l][1]}">${ic[l][0]}</span><span>${t}</span></div>`).join('');
+}
+function cvInfo(){const c=CFG;return{'24dc':{rail:'+24 V DC (PSU G1)',ret:'0 V',coil:'24 V DC'},'110ac':{rail:'110 V AC (T1)',ret:'0',coil:'110 V AC'},'230ac':{rail:'230 V AC (T1)',ret:'0',coil:'230 V AC'},line:{rail:`${c.V} V AC direct (L2)`,ret:'L3',coil:`${c.V} V AC`}}[c.cv]}
+
+/* ---- power diagram ---- */
+function ctrlSym(){
+  const c=CFG;let s=L(470,100,470,122,'x-pin')+L(490,108,490,122,'x-pin')+`<rect x="465" y="122" width="10" height="18" class="fz"/><rect x="485" y="122" width="10" height="18" class="fz"/>`+L(470,140,470,152,'x-pin')+L(490,140,490,152,'x-pin');
+  if(c.cv==='line')s+=L(470,152,470,206,'x-pin')+L(490,152,490,206,'x-pin')+T(480,222,'no transformer!','term')+T(480,234,`control = ${c.V} V ⚠`,'term');
+  else if(c.cv==='24dc')s+=`<rect x="456" y="152" width="48" height="44" rx="4" class="fz"/>`+T(480,171,'G1 PSU','tag')+T(480,186,'~ / =','term')+L(470,196,470,208)+L(490,196,490,208)+T(480,222,'+24 V · 0 V','term');
+  else s+=`<circle cx="480" cy="166" r="14" class="w"/><circle cx="480" cy="188" r="14" class="w"/>`+L(470,198,470,208)+L(490,198,490,208)+T(480,222,`T1 ${c.V}/${c.cv==='110ac'?110:230} V`,'term');
+  return s+T(480,246,'→ control circuit','term');
+}
+function f2box(y){return `<rect x="72" y="${y-4}" width="116" height="48" class="w dash"/>`+T(16,y+20,'F2','tag','start')+T(16,y+33,'O/L','term','start')}
+function tbox(conn){
+  let s=`<rect x="60" y="404" width="140" height="112" rx="6" fill="#fbfaf6" stroke="#6b7785" stroke-width="1.4"/>`+T(206,414,'motor terminal box','term','start');
+  s+=L(90,423,130,497,'wnd x-wd')+L(130,423,170,497,'wnd x-wd')+L(170,423,90,497,'wnd x-wd');
+  if(conn==='Y')s+=`<rect x="80" y="494" width="100" height="12" rx="3" class="link"/>`+T(206,496,'STAR: links across','term','start')+T(206,508,'W2 – U2 – V2','term','start');
+  if(conn==='D')s+=[90,130,170].map(x=>`<rect x="${x-5}" y="418" width="10" height="84" rx="3" class="link"/>`).join('')+T(206,456,'DELTA: links','term','start')+T(206,468,'U1-W2 · V1-U2 · W1-V2','term','start');
+  [[90,'U1'],[130,'V1'],[170,'W1']].forEach(([x,l])=>s+=`<circle cx="${x}" cy="420" r="4" class="tm"/>`+T(x+7,438,l,'term','start'));
+  [[90,'W2'],[130,'U2'],[170,'V2']].forEach(([x,l])=>s+=`<circle cx="${x}" cy="500" r="4" class="tm"/>`+T(x+7,490,l,'term','start'));
+  return s;
+}
+function scr(x){return `<polygon points="${x-9},228 ${x-1},228 ${x-5},238" class="scr"/><polygon points="${x+1},238 ${x+9},238 ${x+5},228" class="scr"/>`+L(x-5,224,x+5,224,'x-pm')+L(x-5,242,x+5,242,'x-pm')+L(x-5,224,x-5,228,'x-pm')+L(x-5,238,x-5,242,'x-pm')+L(x+5,224,x+5,228,'x-pm')+L(x+5,238,x+5,242,'x-pm')}
+function xPower(){
+  const c=CFG,m=c.method,P=[90,130,170],D=D0;
+  let s=T(16,14,`${c.V} V · 3φ · ${c.f} Hz · ${c.gen} kVA generator (IT system)`,'fn','start');
+  P.forEach((x,i)=>{s+=T(x,34,'L'+(i+1))+L(x,40,x,62,'x-pin0')+L(x-4,58,x+4,66)+L(x-4,66,x+4,58)+`<g class="ct x-q1 closed">${L(x,92,x-12,64,'open')}<line class="bridge" x1="${x}" y1="62" x2="${x}" y2="92"/></g>`+L(x,92,x,140,'x-pin')});
+  s+=L(56,78,166,78,'dash')+T(16,82,'Q1','tag','start');
+  s+=DOT(130,100,'x-pin')+L(130,100,470,100,'x-pin')+DOT(170,108,'x-pin')+L(170,108,490,108,'x-pin')+ctrlSym();
+  const km1=cb=>P.map(x=>vKM(x,140,'x-k1','x-pin',cb)).join('')+L(56,169,166,169,'dash')+T(16,166,'KM1','tag','start');
+  const taps=(g,cb)=>DOT(90,116,'x-pin')+L(90,116,270,116,'x-pin')+L(270,116,270,140,'x-pin')+DOT(130,124,'x-pin')+L(130,124,310,124,'x-pin')+L(310,124,310,140,'x-pin')+DOT(170,132,'x-pin')+L(170,132,350,132,'x-pin')+L(350,132,350,140,'x-pin')+[270,310,350].map(x=>vKM(x,140,g,'x-pin',cb)).join('');
+  if(m==='dol')s+=km1('x-pm')+P.map(x=>L(x,192,x,215,'x-pm')+vOL(x,215,'x-pm')+L(x,255,x,416,'x-pm')).join('')+f2box(215)+tbox(D.conn);
+  if(m==='rev'){
+    s+=km1('x-pm')+taps('x-k2','x-pm')+T(16,179,'FWD','term','start')+T(362,166,'KM2','tag','start')+T(362,179,'REV','term','start')+L(263,169,356,169,'dash')+L(166,169,263,169,'ilk')+T(214,160,'interlock','term');
+    s+=`<polyline class="w x-pm" points="270,192 270,222 170,222"/>`+DOT(170,222,'x-pm')+`<polyline class="w x-pm" points="310,192 310,234 130,234"/>`+DOT(130,234,'x-pm')+`<polyline class="w x-pm" points="350,192 350,246 90,246"/>`+DOT(90,246,'x-pm')+T(358,240,'L1 ↔ L3 swapped','term','start');
+    s+=P.map(x=>L(x,192,x,265,'x-pm')+vOL(x,265,'x-pm')+L(x,305,x,416,'x-pm')).join('')+f2box(265)+tbox(D.conn);
+  }
+  if(m==='yd'){
+    s+=km1('x-pm')+T(16,179,'MAIN','term','start')+P.map(x=>L(x,192,x,215,'x-pm')+vOL(x,215,'x-pm')+L(x,255,x,416,'x-pm')).join('')+f2box(215)+taps('x-k3','x-p2')+L(263,169,356,169,'dash')+T(362,166,'KM3','tag','start')+T(362,179,'DELTA','term','start');
+    s+=`<polyline class="w x-p2" points="270,192 270,545 90,545 90,504"/><polyline class="w x-p2" points="310,192 310,557 130,557 130,504"/><polyline class="w x-p2" points="350,192 350,569 170,569 170,504"/>`;
+    s+=L(270,545,410,545,'x-p2')+L(310,557,440,557,'x-p2')+L(350,569,470,569,'x-p2')+DOT(270,545,'x-p2')+DOT(310,557,'x-p2')+DOT(350,569,'x-p2');
+    s+=[410,440,470].map(x=>vKM(x,440,'x-k2','x-ps','x-p2')).join('')+L(410,440,470,440,'x-ps')+DOT(440,440,'x-ps')+T(440,432,'star point','term');
+    s+=L(410,492,410,545,'x-p2')+L(440,492,440,557,'x-p2')+L(470,492,470,569,'x-p2')+L(403,469,478,469,'dash')+T(482,466,'KM2','tag','start')+T(482,479,'STAR','term','start');
+    s+=tbox('YD')+T(16,586,'Terminal box: NO links. KM2 makes star, KM3 makes delta.','term','start');
+  }
+  if(m==='ss'){
+    s+=km1('x-pm')+T(16,179,'LINE','term','start');
+    s+=P.map(x=>L(x,192,x,205,'x-pm')+DOT(x,205,'x-pm')+L(x,205,x+24,205,'x-pm')+vKM(x+24,205,'x-k2','x-pm','x-pm')+L(x+24,257,x+24,272,'x-pm')+L(x+24,272,x,272,'x-pm')+DOT(x,272,'x-pm')+L(x,205,x,224,'x-pm')+scr(x)+L(x,242,x,272,'x-pm')+L(x,272,x,290,'x-pm')+vOL(x,290,'x-pm')+L(x,330,x,416,'x-pm')).join('');
+    s+=`<rect x="68" y="198" width="156" height="84" class="w dash"/>`+T(16,232,'U1','tag','start')+T(16,245,'soft starter','term','start')+T(230,232,'KM2 bypass','term','start')+T(230,245,'(top of ramp)','term','start')+T(230,262,'SCR phase control','term','start')+f2box(290)+tbox(D.conn);
+  }
+  if(m==='vfd'){
+    s+=km1('x-pk1')+T(16,179,'LINE','term','start')+P.map(x=>L(x,192,x,215,'x-pk1')+L(x,320,x,416,'x-pm')).join('');
+    s+=`<rect x="66" y="215" width="128" height="105" rx="6" fill="#eef3f8" stroke="#17212b" stroke-width="1.6"/>`+T(130,240,'U1 · VFD','pt')+T(130,256,'rectifier → DC bus → IGBT','term')+`<path d="M86,280 h22 M86,286 h22 M140,283 q9,-12 18,0 q9,12 18,0" class="w"/>`+`<text id="x-fout" x="130" y="308" class="tag" text-anchor="middle">0.0 Hz</text>`+T(200,236,'motor overload','term','start')+T(200,248,'protection in drive','term','start')+T(200,332,'U · V · W','term','start')+tbox(D.conn);
+  }
+  return s;
+}
+/* ---- ladders ---- */
+function head(ci,vfd){
+  const pt=vfd?['U1 FLT','11','12']:['F2','95','96'],y=100;
+  return T(70,46,ci.rail,'tag','start')+T(760,46,ci.ret,'tag','end')+L(70,y,100,y,'x-n2')+NC(100,y,pt[0],pt[1],pt[2],'x-f2','x-n2','x-n3')+L(140,y,180,y,'x-n3')+WN(160,y,3)+PNC(180,y,'S0 E-STOP','11','12','x-s0','x-n3','x-n4',true)+L(220,y,260,y,'x-n4')+WN(240,y,4)+PNC(260,y,'S1 STOP','11','12','x-s1','x-n4','x-n5')+L(300,y,360,y,'x-n5')+WN(318,y,5);
+}
+function startSeal(lbl,o){const y=100;return PNO(360,y,lbl,'13','14','x-s2','x-n5',o)+L(330,y,330,150,'x-n5')+DOT(330,y,'x-n5')+L(330,150,360,150,'x-n5')+NO(360,150,'KM1','13','14','x-km13','x-n5',o)+L(400,150,440,150,o)+L(440,150,440,y,o)+DOT(440,y,o)}
+function rungLamp(y,tag,t1,t2,id,nc,o,h,fn,col,hid){return L(70,y,100,y,'x-n2')+(nc?NC:NO)(100,y,tag,t1,t2,id,'x-n2',o)+L(140,y,600,y,o)+lamp(600,y,h,fn,col,hid,o)+L(640,y,760,y)}
+function rails(ys,bot){return L(70,60,70,bot,'x-n2')+L(760,60,760,bot)+ys.map(y=>DOT(70,y,'x-n2')+DOT(760,y)).join('')}
+function rung1(ci,vfd,fn){return head(ci,vfd)+startSeal('S2 START','x-n6')+L(400,100,600,100,'x-n6')+WN(520,100,6)+coil(600,100,'KM1','x-km1c','x-n6',fn+' · '+ci.coil)+L(640,100,760,100)}
+function ldDOL(ci){return rung1(ci,false,'MAIN')+rails([100,240,310,380],380)+rungLamp(240,'KM1','23','24','x-km23',false,'x-n7','H1','RUNNING','g','x-h1')+rungLamp(310,'KM1','31','32','x-km31',true,'x-n8','H2','STOPPED','wh','x-h2')+rungLamp(380,'F2','97','98','x-f2no',false,'x-n9','H3','O/L TRIP','a','x-h3')}
+function ldREV(ci){
+  let s=head(ci,false),y=100;
+  s+=PNO(360,y,'S2 FWD','13','14','x-s2','x-n5','x-a')+L(400,y,460,y,'x-a')+WN(430,y,6)+PNC(460,y,'S3 REV','21','22','x-s3nc','x-a','x-b')+L(500,y,520,y,'x-b')+NC(520,y,'KM2','21','22','x-km2nc','x-b','x-c')+L(560,y,600,y,'x-c')+coil(600,y,'KM1','x-km1c','x-c','FWD · '+ci.coil)+L(640,y,760,y);
+  s+=L(330,y,330,270,'x-n5')+DOT(330,y,'x-n5')+L(330,150,360,150,'x-n5')+NO(360,150,'KM1','13','14','x-km13','x-n5','x-a')+L(400,150,440,150,'x-a')+L(440,150,440,y,'x-a')+DOT(440,y,'x-a');
+  y=220;
+  s+=DOT(330,150,'x-n5')+DOT(330,y,'x-n5')+L(330,y,360,y,'x-n5')+PNO(360,y,'S3 REV','13','14','x-s3','x-n5','x-d')+L(400,y,460,y,'x-d')+WN(430,y,9)+PNC(460,y,'S2 FWD','21','22','x-s2nc','x-d','x-e')+L(500,y,520,y,'x-e')+NC(520,y,'KM1','21','22','x-km1nc','x-e','x-f')+L(560,y,600,y,'x-f')+coil(600,y,'KM2','x-km2c','x-f','REV · '+ci.coil)+L(640,y,760,y);
+  s+=L(330,270,360,270,'x-n5')+NO(360,270,'KM2','13','14','x-km2s','x-n5','x-d')+L(400,270,440,270,'x-d')+L(440,270,440,y,'x-d')+DOT(440,y,'x-d');
+  s+=L(70,60,70,100,'x-n2')+DOT(70,100,'x-n2')+L(760,60,760,220)+DOT(760,100)+DOT(760,220);
+  return s+T(330,330,'Interlocks: KM1 / KM2 21-22 (electrical) · S2 / S3 NC (pushbutton) · mechanical lever','fn','start');
+}
+function ldYD(ci){
+  let s=rung1(ci,false,'MAIN')+L(70,60,70,100,'x-n2')+DOT(70,100,'x-n2')+L(760,60,760,350)+DOT(760,100)+L(460,100,460,350,'x-n6')+DOT(460,100,'x-n6');
+  let y=210;s+=DOT(460,y,'x-n6')+L(460,y,600,y,'x-n6')+coil(600,y,'KT','x-ktc','x-n6','TIMER on-delay')+`<text id="x-ktt" x="652" y="228" class="term"></text>`+L(640,y,760,y)+DOT(760,y);
+  y=280;s+=DOT(460,y,'x-n6')+L(460,y,470,y,'x-n6')+NC(470,y,'KT','55','56','x-kt55','x-n6','x-a')+L(510,y,520,y,'x-a')+NC(520,y,'KM3','21','22','x-km3nc','x-a','x-b')+L(560,y,600,y,'x-b')+coil(600,y,'KM2','x-km2c','x-b','STAR (Y)')+L(640,y,760,y)+DOT(760,y);
+  y=350;s+=L(460,y,470,y,'x-n6')+NO(470,y,'KT','67','68','x-kt67','x-n6','x-c')+L(510,y,520,y,'x-c')+NC(520,y,'KM2','21','22','x-km2nc','x-c','x-d')+L(560,y,600,y,'x-d')+coil(600,y,'KM3','x-km3c','x-d','DELTA (Δ)')+L(640,y,760,y);
+  return s+T(80,250,'Start: KM1 + KM2 (star).','fn','start')+T(80,268,'After KT: 55-56 opens → KM2 out,','fn','start')+T(80,286,'67-68 closes → KM3 in (delta).','fn','start')+T(80,304,'KM2 / KM3 NC = interlock.','fn','start');
+}
+function ldSS(ci){
+  let s=rung1(ci,false,'LINE')+rails([100,220,290,380,450],450);
+  s+=L(70,220,100,220,'x-n2')+NO(100,220,'KM1','23','24','x-k1a','x-n2','x-g')+L(140,220,600,220,'x-g')+coil(600,220,'U1','x-run','x-g','RUN input (soft starter)')+L(640,220,760,220);
+  s+=L(70,290,100,290,'x-n2')+NO(100,290,'U1 TOR','13','14','x-tor','x-n2','x-h')+L(140,290,600,290,'x-h')+coil(600,290,'KM2','x-km2c','x-h','BYPASS')+`<text id="x-ktt" x="652" y="310" class="term"></text>`+L(640,290,760,290);
+  return s+rungLamp(380,'KM1','31','32','x-km31',true,'x-n8','H2','STOPPED','wh','x-h2')+rungLamp(450,'F2','97','98','x-f2no',false,'x-n9','H3','O/L TRIP','a','x-h3')+T(160,330,'U1 TOR = “top of ramp” relay output of the soft starter','term','start');
+}
+function ldVFD(ci){
+  let s=rung1(ci,true,'LINE')+rails([100,220,290,380,450],450);
+  s+=L(70,220,100,220,'x-n2')+NO(100,220,'KM1','23','24','x-k1a','x-n2','x-g')+L(140,220,600,220,'x-g')+coil(600,220,'U1 DI1','x-run','x-g','RUN command')+L(640,220,760,220);
+  s+=rungLamp(290,'U1 RUN','13','14','x-vrun',false,'x-r','H1','RUNNING','g','x-h1')+`<text id="x-ktt" x="652" y="310" class="term"></text>`;
+  s+=rungLamp(380,'KM1','31','32','x-km31',true,'x-n8','H2','STOPPED','wh','x-h2')+rungLamp(450,'U1 FLT','13','14','x-f2no',false,'x-n9','H3','DRIVE FAULT','a','x-h3');
+  return s+T(160,330,'Speed reference: AI1 potentiometer / AMS 4–20 mA · motor OL & ramps are drive parameters','term','start');
+}
+function xLadder(){return{dol:ldDOL,rev:ldREV,yd:ldYD,ss:ldSS,vfd:ldVFD}[CFG.method](cvInfo())}
+/* ---- connection view ---- */
+function xConnSVG(key){
+  const isY=key==='Y'||key==='YD-Y',isD=key==='D'||key==='YD-D',yd=key.startsWith('YD');
+  const cols=['#8a5a2b','#1d1d1d','#8c8c8c'],tx=[70,140,210],ty=110,by=210;
+  let s=`<rect x="14" y="34" width="250" height="240" rx="14" fill="#55616d" stroke="#2c353e" stroke-width="2"/>`+T(139,14,'TERMINAL BOX — ACTUAL VIEW','pl');
+  tx.forEach((x,i)=>s+=`<line x1="${x}" y1="24" x2="${x}" y2="${ty}" stroke="${cols[i]}" stroke-width="8" stroke-linecap="round"/><text x="${x+9}" y="56" class="pl" style="fill:#fff">L${i+1}</text>`);
+  if(yd)tx.forEach((x,i)=>s+=`<line x1="${x}" y1="${by}" x2="${x}" y2="300" stroke="#2f4858" stroke-width="8" stroke-linecap="round"/>`);
+  s+=`<g stroke="#b9c2cb" stroke-width="2" stroke-dasharray="5 4" opacity=".6"><line x1="70" y1="110" x2="140" y2="210"/><line x1="140" y1="110" x2="210" y2="210"/><line x1="210" y1="110" x2="70" y2="210"/></g>`;
+  if(isY&&!yd)s+=`<rect x="52" y="${by-10}" width="176" height="20" rx="5" class="link"/>`;
+  if(isD&&!yd)s+=tx.map(x=>`<rect x="${x-9}" y="${ty-6}" width="18" height="${by-ty+12}" rx="5" class="link"/>`).join('');
+  [['U1','V1','W1'],['W2','U2','V2']].forEach((row,j)=>tx.forEach((x,i)=>{const y=j?by:ty;s+=`<circle cx="${x}" cy="${y}" r="13" fill="#cfd4d9" stroke="#1d242b" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="6" fill="#8d949b"/><text x="${x+17}" y="${y+(j?26:24)}" class="pl" style="fill:#fff">${row[i]}</text>`}));
+  s+=`<circle cx="238" cy="252" r="8" fill="#3a9d4a" stroke="#f2d21b" stroke-width="3"/><text x="222" y="256" class="pls" style="fill:#fff" text-anchor="end">PE</text>`;
+  s+=T(139,318,yd?'cables W2 U2 V2 → KM2 / KM3 (no links)':isY?'STAR: one link bar joins W2-U2-V2':'DELTA: three links U1-W2 · V1-U2 · W1-V2','term');
+  const cx=450,cy=168,ttl=isY?'STAR (Y)':isD?'DELTA (Δ)':'OPEN: windings not connected';
+  s+=T(450,22,ttl+(yd&&!key.endsWith('open')?' via contactors':''),'pt');
+  const coilAt=(x1,y1,x2,y2)=>{const mx=(x1+x2)/2,my=(y1+y2)/2,a=Math.atan2(y2-y1,x2-x1)*180/Math.PI;return L(x1,y1,x2,y2,'x-wd')+`<rect x="-24" y="-8" width="48" height="16" rx="3" class="wc x-wd" transform="translate(${mx},${my}) rotate(${a})"/>`};
+  const pt=(a,R)=>[cx+R*Math.cos(a*Math.PI/180),cy+R*Math.sin(a*Math.PI/180)];
+  if(isY){
+    const E=[pt(-90,105),pt(30,105),pt(150,105)],lb=['U1 ← L1','V1 ← L2','W1 ← L3'];
+    E.forEach((e,i)=>s+=coilAt(cx,cy,e[0],e[1])+`<circle cx="${e[0]}" cy="${e[1]}" r="4" class="tm"/>`);
+    s+=T(E[0][0]+10,E[0][1]-2,lb[0],'tag','start')+T(E[1][0]+8,E[1][1]+16,lb[1],'tag','start')+T(E[2][0]-8,E[2][1]+16,lb[2],'tag','end')+DOT(cx,cy,'x-wd')+T(cx+10,cy+4,'U2·V2·W2 star point','term','start');
+  }else if(isD){
+    const P=[pt(-90,108),pt(30,108),pt(150,108)];
+    s+=coilAt(P[0][0],P[0][1],P[1][0],P[1][1])+coilAt(P[1][0],P[1][1],P[2][0],P[2][1])+coilAt(P[2][0],P[2][1],P[0][0],P[0][1]);
+    P.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" class="tm"/>`);
+    s+=T(P[0][0]+10,P[0][1]-2,'U1·W2 ← L1','tag','start')+T(P[1][0]+8,P[1][1]+16,'V1·U2 ← L2','tag','start')+T(P[2][0]-8,P[2][1]+16,'W1·V2 ← L3','tag','end');
+  }else{
+    [390,450,510].forEach((x,i)=>s+=coilAt(x,80,x,240)+T(x,72,['U1','V1','W1'][i],'tag')+T(x,258,['U2','V2','W2'][i],'tag'));
+  }
+  s+=`<text id="x-cv1" x="450" y="292" class="fn" text-anchor="middle"></text><text id="x-cv2" x="450" y="310" class="fn" text-anchor="middle"></text>`;
+  s+=`<circle cx="600" cy="62" r="26" fill="#fff" stroke="#17212b" stroke-width="1.8"/><circle id="x-rotor" class="rotor" cx="600" cy="62" r="18"/>`+T(600,70,'M','motor');
+  return s;
+}
+/* ---- engine ---- */
+const K=s=>s===0?0:2*2.8/(s/0.25+0.25/s);
+const Ish=s=>{const a=Math.abs(s);return Math.sqrt((6.61*a/Math.sqrt(a*a+0.1024))**2+0.1225)};
+const TA={pump:1.4,fan:4,compressor:1.5,winch:2};
+function newState(){return{on:true,start:false,stop:false,rev:false,es:false,ol:false,q1:false,burnt:false,k1:false,k2:false,k3:false,kt:0,timed:false,ramp:0,fo:0,n:0,thO:0,thW:0,E:1,vb:1,t:0,stallT:0,stallMsg:false,hotMsg:false,starting:false,ts:0,imax:0,vmin:1,hist:[],log:[],sample:0,N:{},energ:false,Vw:0,Iw:0,IL:0,Is:0,Tm:0,S:0,Tw:45,sE:0,conn:null}}
+let D0=derive();const XS=newState();
+function xlog(l,t){XS.log.unshift({t:XS.t,l,txt:t});if(XS.log.length>40)XS.log.pop()}
+function logic(){
+  const x=XS,m=CFG.method,p=x.on&&!x.q1&&x.vb>0.65&&!x.burnt,n3=p&&!x.ol,n4=n3&&!x.es,n5=n4&&!x.stop,N={n2:p,n3,n4,n5};
+  if(m==='rev'){
+    x.k1=n5&&(x.start||x.k1)&&!x.rev&&!x.k2;x.k2=n5&&(x.rev||x.k2)&&!x.start&&!x.k1;x.k3=false;
+    const a=n5&&(x.start||x.k1),b=a&&!x.rev,d=n5&&(x.rev||x.k2),e=d&&!x.start;Object.assign(N,{a,b,c:b&&!x.k2,d,e,f:e&&!x.k1});
+  }else{
+    x.k1=n5&&(x.start||x.k1);N.n6=x.k1;
+    if(m==='yd'){if(!x.k1)x.kt=0;x.timed=x.k1&&x.kt>=CFG.kt;x.k2=x.k1&&!x.timed&&!x.k3;x.k3=x.k1&&x.timed&&!x.k2;Object.assign(N,{a:x.k1&&!x.timed,b:x.k2,c:x.k1&&x.timed,d:x.k3})}
+    else x.k3=false;
+    if(m==='ss'){if(!x.k1)x.ramp=0;x.k2=x.k1&&x.ramp>=1;N.g=p&&x.k1;N.h=p&&x.k2}
+    if(m==='vfd'){if(!x.k1)x.fo=0;N.g=p&&x.k1;N.r=p&&x.fo>0.5}
+    if(m==='dol'||m==='vfd')x.k2=false;
+    N.n7=p&&x.k1;N.n8=p&&!x.k1;N.n9=p&&x.ol;
+  }
+  x.N=N;
+}
+function step(dt){
+  const x=XS,c=CFG,m=c.method,D=D0,pk1=x.k1,pk2=x.k2,pk3=x.k3,pol=x.ol,pq=x.q1,pb=x.burnt,pOn=pk1||pk2;
+  logic();
+  if(m==='yd'&&x.k1)x.kt+=dt;
+  if(m==='ss'&&x.k1&&x.ramp<1)x.ramp=Math.min(1,x.ramp+dt/c.ssT);
+  let conn=null,dir=1;
+  if(m==='yd'){if(x.k1&&x.k2)conn='Y';else if(x.k1&&x.k3)conn='D'}
+  else if(m==='rev'){if(x.k1||x.k2){conn=D.conn;dir=x.k2?-1:1}}
+  else if(x.k1)conn=D.conn;
+  if(m==='vfd'){if(x.k1){const tg=c.vfdSp/100*c.mf,lim=x.IL>1.5*D.FLC;if(x.fo<tg&&!lim)x.fo=Math.min(tg,x.fo+c.mf*dt/c.vfdT);else if(x.fo>tg)x.fo=Math.max(tg,x.fo-c.mf*dt/c.vfdT)}else x.fo=0}
+  const Vl=c.V*x.vb;let Vw=0,ns=1,fe=c.f;
+  if(conn){Vw=conn==='D'?Vl:Vl/SQ3;
+    if(m==='ss'&&!x.k2)Vw*=c.ssU0/100+(1-c.ssU0/100)*x.ramp;
+    if(m==='vfd'){fe=Math.max(x.fo,1);ns=x.fo/c.f;Vw=Math.min(Vw,D.Vd*fe/c.mf)}}
+  const en=!!conn&&Vw>1&&(m!=='vfd'||x.fo>0.05);
+  const vr=en?(Vw/D.Vd)*(c.mf/fe):0,sE=en?(dir*ns-x.n)*c.f/c.mf:0,Tm=en?vr*vr*K(sE):0;
+  const sat=vr>1.08?1+2.5*(vr-1.08):1,Iw=en?D.Iwr*vr*Ish(sE)*sat:0,IL=en?(conn==='D'?SQ3*Iw:Iw):0;
+  const nm=x.n*c.f/c.mf,pf=c.load==='pump'||c.load==='fan',tl=(pf?(c.lp/100)*nm*nm:c.lp/100)+0.02,brk=pf?0.05:c.lp/100*1.1+0.02,Ta=TA[c.load]*(1+c.kw/200);
+  if(Math.abs(x.n)<1e-3&&Math.abs(Tm)<=brk)x.n=0;
+  else{const n0=x.n,Tl=Math.sign(x.n||Tm)*tl;x.n+=(Tm-Tl)/Ta*dt;if(n0!==0&&Math.sign(x.n)!==Math.sign(n0)&&Math.abs(Tm)<tl)x.n=0}
+  let Is=IL;if(m==='vfd'){const P=Math.max(0,Tm*nm)*c.kw/D.eta+(x.k1?0.02*c.kw:0);Is=P*1000/(SQ3*Math.max(Vl,1)*0.95)}
+  const S=SQ3*Vl*Is/1000;
+  if(x.on){const Sn=S/Math.max(x.vb*x.vb,0.05);x.vb=x.E/(1+0.15*Sn/c.gen);x.E=Math.min(1.6,Math.max(1,x.E+(1-x.vb)*dt/0.6))}else{x.vb=0;x.E=1}
+  const Iol=m==='yd'?Iw:IL;
+  x.thO+=((Iol/D.olSet)**2-x.thO)*dt/200;
+  if(x.thO>=1.3&&!x.ol)x.ol=true;
+  if(m==='vfd'&&IL>2.5*D.FLC)x.ol=true;
+  if(m!=='vfd'&&Is>14*D.FLC)x.q1=true;
+  x.thW+=((Iw/D.Iwr)**2-x.thW)*dt/410;const Tw=45+75*x.thW;
+  if(Tw>200)x.burnt=true;
+  if(en&&Math.abs(sE)>0.5&&m!=='vfd'&&!(m==='ss'&&x.ramp<1))x.stallT+=dt;else x.stallT=0;
+  if(x.stallT>6&&!x.stallMsg){x.stallMsg=true;xlog('x',`Motor NOT accelerating (speed ${pct(x.n)}): available torque is lower than the load torque. Current stays ${(Is/D.FLC).toFixed(1)} × FLC → overload will trip.`)}
+  if(!en)x.stallMsg=false;
+  Object.assign(x,{energ:en,Vw,Iw,IL,Is,Tm,S,Tw,sE,vr,conn});
+  if(x.starting){x.imax=Math.max(x.imax,Is);x.vmin=Math.min(x.vmin,x.vb);
+    if(en&&Math.abs(sE)<0.15&&(m!=='yd'||x.k3)&&(m!=='ss'||x.k2)&&(m!=='vfd'||x.fo>=c.vfdSp/100*c.mf-0.05)){x.starting=false;xlog('ok',`Start complete in ${(x.t-x.ts).toFixed(1)} s · peak ${Math.round(x.imax)} A (${(x.imax/D.FLC).toFixed(1)} × FLC) · lowest bus ${Math.round(x.vmin*c.V)} V (dip ${pct(1-x.vmin)}).`)}}
+  x.t+=dt;x.sample+=dt;
+  if(x.sample>=0.1){x.sample=0;x.hist.push([x.t,x.Is/D.FLC,x.n,x.vb]);while(x.hist.length&&x.hist[0][0]<x.t-30)x.hist.shift()}
+  const kOn=x.k1||x.k2;
+  if(!pOn&&kOn){x.starting=true;x.ts=x.t;x.imax=0;x.vmin=1;
+    xlog('i',{dol:'KM1 closed: DOL at full voltage, inrush ≈ 6–7 × FLC.',rev:x.k2?'KM2 closed: REVERSE (L1 and L3 swapped).':'KM1 closed: FORWARD.',yd:`KM1 + KM2 closed: STAR, ${Math.round(c.V/SQ3)} V per winding, ≈ ⅓ current & torque.`,ss:`KM1 closed: soft start ramp ${c.ssU0} % → 100 % in ${c.ssT} s.`,vfd:`KM1 closed + RUN: VFD ramps 0 → ${(c.vfdSp/100*c.mf).toFixed(0)} Hz in ${(c.vfdT*c.vfdSp/100).toFixed(0)} s.`}[m])}
+  if(m==='rev'&&((pk1&&x.k2)||(pk2&&x.k1)))xlog('w','Direct reversal (plugging): the motor brakes against the rotating field. Current ≈ 7 × FLC and heavy mechanical shock. On winches/cranes, STOP first.');
+  if(m==='yd'&&!pk3&&x.k3)xlog(x.n<0.7?'w':'ok',`KT timed out: KM2 (star) out, KM3 in → DELTA at ${pct(x.n)} speed${x.n<0.7?'. Changed over too early, big current peak. Set KT longer':''}.`);
+  if(m==='ss'&&!pk2&&x.k2)xlog('ok','Top of ramp: bypass KM2 closed, the thyristors are now idle.');
+  if(!pol&&x.ol)xlog('x',m==='vfd'?`VFD tripped: motor overload / overcurrent (${(Iol/D.olSet).toFixed(1)} × setting).`:`F2 OVERLOAD TRIP: current was ${(Iol/D.olSet).toFixed(1)} × setting (${f1(D.olSet)} A). 95-96 opened.`);
+  if(!pq&&x.q1)xlog('x',`Q1 MAGNETIC TRIP: ${Math.round(Is)} A = ${Math.round(Is/D.FLC)} × FLC.${vr>1.15?' Winding overvoltage: WRONG CONNECTION!':''}`);
+  if(!pb&&x.burnt)xlog('x','WINDING BURNT (> 200 °C): insulation failed, motor must be rewound. Protection did not act in time. Check the F2 setting and the connection.');
+  if(Tw>155&&!x.hotMsg){x.hotMsg=true;xlog('w',`Winding ${Math.round(Tw)} °C: above class F limit (155 °C). Insulation life is dropping fast.`)}
+  if(Tw<140)x.hotMsg=false;
+  if(pOn&&!kOn){x.starting=false;const why=!x.on?'Blackout: no-volt release, contactor dropped out.':x.burnt?'Motor burnt: supply removed.':x.q1?'Q1 tripped: contactor dropped out.':x.ol?(m==='vfd'?'Drive fault: KM1 dropped out.':'F2 tripped: KM dropped out.'):x.vb<=0.65?`Bus voltage fell to ${pct(x.vb)}: coils dropped out (undervoltage). Other consumers would drop too!`:x.es?'E-STOP operated.':'STOP: coil de-energised, seal-in opened.';xlog(x.vb<=0.65||!x.on?'w':'i',why)}
+}
+/* ---- render ---- */
+let ang=0,connKey=null;
+const rdc=(lbl,v,sub,cls='')=>`<div class="rd ${cls}"><small>${lbl}</small><b>${v}</b><span>${sub}</span></div>`;
+function renderX(){
+  const x=XS,c=CFG,m=c.method,D=D0,N=x.N;
+  const key=m==='yd'?'YD-'+(x.k1&&x.k2?'Y':x.k1&&x.k3?'D':'open'):D.conn;
+  if(key!==connKey){$('x-cn').innerHTML=xConnSVG(key);connKey=key}
+  ['n2','n3','n4','n5','n6','n7','n8','n9','a','b','c','d','e','f','g','h','r'].forEach(k=>lv('x-'+k,N[k]));
+  const live=x.on&&!x.q1;
+  lv('x-pin0',x.on);lv('x-pin',live);lv('x-pk1',live&&x.k1);lv('x-pm',m==='vfd'?x.energ:live&&(x.k1||x.k2));
+  lv('x-p2',m==='yd'&&live&&x.k1&&(x.k2||x.k3));lv('x-ps',m==='yd'&&live&&x.k1&&x.k2);lv('x-wd',x.energ);
+  G('x-k1','closed',x.k1);G('x-k2','closed',x.k2);G('x-k3','closed',x.k3);G('x-q1','closed',!x.q1);
+  const cl={'x-f2':!x.ol,'x-f2no':x.ol,'x-km13':x.k1,'x-km23':x.k1,'x-km31':!x.k1,'x-km2s':x.k2,'x-km2nc':!x.k2,'x-km1nc':!x.k1,'x-kt55':!x.timed,'x-kt67':x.timed,'x-km3nc':!x.k3,'x-k1a':x.k1,'x-tor':x.k2,'x-vrun':x.fo>0.5};
+  for(const k in cl)C(k,'closed',cl[k]);
+  const pr={'x-s0':x.es,'x-s1':x.stop,'x-s2':x.start,'x-s2nc':x.start,'x-s3':x.rev,'x-s3nc':x.rev};for(const k in pr)C(k,'pressed',pr[k]);
+  const on={'x-km1c':x.k1,'x-km2c':x.k2,'x-km3c':x.k3,'x-ktc':m==='yd'&&x.k1,'x-run':x.k1&&x.on,'x-h1':m==='vfd'?N.r:N.n7,'x-h2':N.n8,'x-h3':N.n9};for(const k in on)C(k,'on',on[k]);
+  const kt=$('x-ktt');if(kt)kt.textContent=m==='yd'?(x.k1?(x.timed?'timed out ✓':`t = ${x.kt.toFixed(1)} / ${c.kt} s`):''):m==='ss'?(x.k1?(x.k2?'bypassed ✓':`ramp ${Math.round(x.ramp*100)} %`):''):m==='vfd'?`${x.fo.toFixed(1)} Hz`:'';
+  const fo=$('x-fout');if(fo)fo.textContent=x.fo.toFixed(1)+' Hz';
+  const cv1=$('x-cv1'),cv2=$('x-cv2');
+  if(cv1){cv1.textContent=x.energ?`Winding voltage ${Math.round(x.Vw)} V (rated ${Math.round(D.VdE*(m==='vfd'?x.fo/c.f:1))} V) → ${pct(x.vr)} flux`:'No voltage on windings';
+    cv2.textContent=x.energ?(x.conn==='D'?`I line ${Math.round(x.IL)} A = √3 × I winding ${Math.round(x.Iw)} A`:`I line = I winding = ${Math.round(x.Iw)} A`):'';}
+  ang+=x.n*55;rot('x-rotor',ang,x.energ);
+  const stage={dol:x.k1?'RUN':'STOP',rev:x.k1?'FWD':x.k2?'REV':'STOP',yd:x.k2?'STAR':x.k3?'DELTA':x.k1?'…':'STOP',ss:x.k2?'BYPASS':x.k1?`RAMP ${Math.round(x.ramp*100)}%`:'STOP',vfd:x.k1?`${x.fo.toFixed(1)} Hz`:'STOP'}[m];
+  const st=x.burnt?'BURNT':x.q1?'Q1 TRIP':x.ol?(m==='vfd'?'FAULT':'F2 TRIP'):stage;
+  $('x-read').innerHTML=rdc('Supply current',`${Math.round(x.Is)} A`,`${(x.Is/D.FLC).toFixed(1)} × FLC (${f1(D.FLC)} A)`,x.Is/D.FLC>3?'warnr':'')
+    +rdc('Bus voltage',`${Math.round(c.V*x.vb)} V`,`dip ${pct(Math.max(0,1-x.vb))}`,x.vb<0.85?'alert':x.vb<0.9?'warnr':'')
+    +rdc('Speed',`${Math.round(Math.abs(x.n)*30*c.f)} rpm`,`${pct(x.n)} ${x.n<-0.01?'REVERSE':''} (4-pole)`)
+    +rdc('Motor torque',`${Math.round(x.Tm*100)} %`,'of rated torque')
+    +rdc('Winding temp',`${Math.round(x.Tw)} °C`,x.Tw>155?'over class F!':'class F limit 155 °C',x.Tw>155?'alert':x.Tw>130?'warnr':'')
+    +rdc(m==='vfd'?'Drive OL':'F2 thermal',`${Math.round(x.thO/1.3*100)} %`,`of trip · set ${f1(D.olSet)} A`,x.ol?'alert':x.thO>1?'warnr':'')
+    +rdc('Generator load',`${Math.round(x.S/c.gen*100)} %`,`${Math.round(x.S)} kVA of ${c.gen}`,x.S>c.gen?'alert':'')
+    +rdc('Starter',st,NAMES[m]+' · '+(m==='yd'?'Y → Δ':D.conn==='D'?'Δ':'Y'),x.burnt||x.q1||x.ol?'alert':'');
+  if(x.log[0])$('x-msg').textContent=x.log[0].txt;
+  $('x-log').innerHTML=x.log.map(e=>`<div class="lg-${e.l}">[${e.t.toFixed(1)} s] ${e.txt}</div>`).join('')||'<div>No events yet.</div>';
+  togTxt('x-bE',x.es,'⏻ E-STOP','⏻ E-STOP latched: reset');togTxt('x-bP',!x.on,'⚡ Blackout','⚡ Restore supply');
+  $('x-bF').textContent=x.q1?'↺ Reset Q1':x.ol?(m==='vfd'?'↺ Reset drive fault':'↺ Reset F2'):'↺ Reset trips';
+  drawChart();
+}
+function drawChart(){
+  const cv=$('x-chart'),w=cv.clientWidth,h=190,dpr=window.devicePixelRatio||1;if(!w)return;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const pl=44,pr=46,pt=22,pb=20,W=w-pl-pr,H=h-pt-pb,t1=Math.max(30,XS.t),t0=t1-30,X=t=>pl+(t-t0)/30*W,YI=v=>pt+H-Math.min(v,8)/8*H,YP=v=>pt+H-Math.max(0,Math.min(v,1.2))/1.2*H;
+  g.font='10px IBM Plex Mono, monospace';g.strokeStyle='#ece8df';g.fillStyle='#6b7785';g.lineWidth=1;
+  for(let i=0;i<=8;i+=2){g.beginPath();g.moveTo(pl,YI(i));g.lineTo(pl+W,YI(i));g.stroke();g.fillText(i+'×',8,YI(i)+3)}
+  [0,0.5,1].forEach(v=>g.fillText(Math.round(v*100)+'%',pl+W+6,YP(v)+3));
+  const series=(idx,Y,col,abs)=>{g.strokeStyle=col;g.lineWidth=2;g.beginPath();XS.hist.forEach((p,i)=>{const v=abs?Math.abs(p[idx]):p[idx];i?g.lineTo(X(p[0]),Y(v)):g.moveTo(X(p[0]),Y(v))});g.stroke()};
+  series(1,YI,'#e4572e');series(2,YP,'#1f6fb2',true);series(3,YP,'#2e9e5b');
+  g.font='600 11px IBM Plex Sans, sans-serif';[['current × FLC','#e4572e'],['speed %','#1f6fb2'],['bus voltage %','#2e9e5b']].forEach(([t,c],i)=>{g.fillStyle=c;g.fillRect(pl+i*130,6,12,4);g.fillText(t,pl+i*130+16,12)});
+}
+/* ---- form & wiring ---- */
+function renderStatic(){
+  const c=CFG;$('x-pw').innerHTML=xPower();$('x-ld').innerHTML=xLadder();connKey=null;renderAssess();
+  $('x-bR').style.display=c.method==='rev'?'':'none';$('x-bS').textContent=c.method==='rev'?'⟳ FWD (hold)':'▶ START (hold)';
+  document.querySelectorAll('#full [data-show]').forEach(e=>e.style.display=e.dataset.show===c.method?'':'none');
+  $('x-connrow').querySelector('select').disabled=c.method==='yd';
+  $('x-pwt').textContent=`Power circuit · ${NAMES[c.method]} · ${c.V} V ${c.f} Hz · ${c.method==='yd'?'Y → Δ':D0.conn==='D'?'motor in DELTA':'motor in STAR'}`;
+  $('x-ldt').textContent=`Control circuit · ${cvInfo().rail}`;
+}
+function syncForm(){
+  document.querySelectorAll('#full [data-k]').forEach(el=>{const k=el.dataset.k;if(el.type==='checkbox')el.checked=!!CFG[k];else el.value=CFG[k];if(el.type==='range'&&el.nextElementSibling)el.nextElementSibling.textContent=CFG[k]+(el.dataset.u||'')});
+  const oi=$('x-olin');oi.disabled=CFG.olAuto;oi.value=f1(CFG.olAuto||!CFG.ol?D0.olRec:CFG.ol);
+}
+function onCfg(msg){D0=derive();Object.assign(XS,newState());renderStatic();syncForm();xlog('i',msg||`Configured: ${NAMES[CFG.method]}, ${CFG.kw} kW ${CFG.mot} V ${CFG.mf} Hz motor on ${CFG.V} V ${CFG.f} Hz. Hold START.`)}
+(function initX(){
+  for(const k in OPTS){const el=document.querySelector(`#full [data-k="${k}"]`);el.innerHTML=OPTS[k].map(v=>`<option value="${v}">${FMT[k](String(v))}</option>`).join('')}
+  $('x-pre').innerHTML='<option value="">— choose a scenario —</option>'+Object.entries(PRESETS).map(([k,p])=>`<option value="${k}">${p.name}</option>`).join('');
+  $('x-pre').addEventListener('change',e=>{const p=PRESETS[e.target.value];if(!p)return;const{name,...r}=p;Object.assign(CFG,{conn:'auto',olAuto:true,ol:0,vfdSp:100,ssU0:40,kt:6},r);onCfg('Scenario: '+name+'. Hold START.')});
+  document.querySelectorAll('#full [data-k]').forEach(el=>{
+    const k=el.dataset.k,live=el.dataset.live!==undefined;
+    const apply=()=>{let v=el.type==='checkbox'?el.checked:el.dataset.n!==undefined?+el.value:el.value;CFG[k]=v;if(k==='ol')CFG.olAuto=false;if(k==='olAuto'&&!v&&!CFG.ol)CFG.ol=+f1(D0.olRec);
+      if(live){D0=derive();syncForm();renderAssess()}else{$('x-pre').value='';onCfg()}};
+    if(el.type==='range')el.addEventListener('input',()=>{el.nextElementSibling.textContent=el.value+(el.dataset.u||'');if(live)apply()});
+    el.addEventListener('change',apply);
+  });
+  $('x-apply').addEventListener('click',()=>{const r=recommend(D0);if(!r.method){xlog('x',r.why);renderX();return}Object.assign(CFG,{method:r.method,conn:'auto',olAuto:true});$('x-pre').value='';onCfg('Applied recommendation: '+NAMES[r.method]+'. '+r.why)});
+  const kick=()=>step(0.001);
+  hold('x-bS',XS,'start',kick);hold('x-bR',XS,'rev',kick);hold('x-bT',XS,'stop',kick);
+  tog('x-bE',XS,'es',kick);tog('x-bP',XS,'on',kick);
+  $('x-bF').addEventListener('click',()=>{if(XS.q1){XS.q1=false;xlog('w','Q1 reset. Find the cause before restarting!')}else if(XS.ol){if(CFG.method!=='vfd'&&XS.thO>1.2)xlog('w',`F2 bimetal still hot (${Math.round(XS.thO/1.3*100)} %). Wait for it to cool before reset.`);else{XS.ol=false;xlog('i',CFG.method==='vfd'?'Drive fault reset.':'F2 reset.')}}});
+  $('x-bX').addEventListener('click',()=>onCfg('Simulation reset.'));
+  onCfg();
+  setInterval(()=>{const n=Math.round(CFG.spd*5);for(let i=0;i<n;i++)step(0.01);renderX()},50);
+})();
+</script>
+</body>
+</html>
